@@ -1,0 +1,210 @@
+[
+  {
+    "id": "fixed-1",
+    "date": "2023-06-18",
+    "time": "16:00",
+    "competition": "Campeonato Brasileiro",
+    "teams": {
+      "home": {
+        "name": "Botafogo",
+        "logo": "https://www.botafogo.com.br/img/escudo.png",
+        "isBotafogo": true
+      },
+      "away": {
+        "name": "Flamengo",
+        "logo": "https://logodetimes.com/times/flamengo/logo-flamengo-256.png",
+        "isBotafogo": false
+      }
+    },
+    "venue": "Estádio Nilton Santos",
+    "isFuture": true
+  },
+  {
+    "id": "fixed-2",
+    "date": "2023-06-25",
+    "time": "19:30",
+    "competition": "Copa do Brasil",
+    "teams": {
+      "home": {
+        "name": "Palmeiras",
+        "logo": "https://logodetimes.com/times/palmeiras/logo-palmeiras-256.png",
+        "isBotafogo": false
+      },
+      "away": {
+        "name": "Botafogo",
+        "logo": "https://www.botafogo.com.br/img/escudo.png",
+        "isBotafogo": true
+      }
+    },
+    "venue": "Allianz Parque",
+    "isFuture": true
+  },
+  {
+    "id": "fixed-3",
+    "date": "2023-07-02",
+    "time": "20:00",
+    "competition": "Campeonato Brasileiro",
+    "teams": {
+      "home": {
+        "name": "Botafogo",
+        "logo": "https://www.botafogo.com.br/img/escudo.png",
+        "isBotafogo": true
+      },
+      "away": {
+        "name": "São Paulo",
+        "logo": "https://logodetimes.com/times/sao-paulo/logo-sao-paulo-256.png",
+        "isBotafogo": false
+      }
+    },
+    "venue": "Estádio Nilton Santos",
+    "isFuture": true
+  },
+  {
+    "id": "fixed-4",
+    "date": "2023-07-09",
+    "time": "16:00",
+    "competition": "Campeonato Brasileiro",
+    "teams": {
+      "home": {
+        "name": "Atlético-MG",
+        "logo": "https://logodetimes.com/times/atletico-mineiro/logo-atletico-mineiro-256.png",
+        "isBotafogo": false
+      },
+      "away": {
+        "name": "Botafogo",
+        "logo": "https://www.botafogo.com.br/img/escudo.png",
+        "isBotafogo": true
+      }
+    },
+    "venue": "Arena MRV",
+    "isFuture": true
+  },
+  {
+    "id": "fixed-5",
+    "date": "2023-07-16",
+    "time": "19:00",
+    "competition": "Libertadores",
+    "teams": {
+      "home": {
+        "name": "Botafogo",
+        "logo": "https://www.botafogo.com.br/img/escudo.png",
+        "isBotafogo": true
+      },
+      "away": {
+        "name": "Defensa y Justicia",
+        "logo": "https://logodetimes.com/times/defensa-y-justicia/logo-defensa-y-justicia-256.png",
+        "isBotafogo": false
+      }
+    },
+    "venue": "Estádio Nilton Santos",
+    "isFuture": true
+  },
+  {
+    "id": "br-2025-santos",
+    "date": "2025-06-01",
+    "time": "16:00",
+    "competition": "CAMPEONATO BRASILEIRO",
+    "teams": {
+      "home": {
+        "name": "Santos",
+        "logo": "https://logodetimes.com/times/santos/logo-santos-256.png",
+        "isBotafogo": false
+      },
+      "away": {
+        "name": "Botafogo",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/1200px-Botafogo_de_Futebol_e_Regatas_logo.svg.png",
+        "isBotafogo": true
+      }
+    },
+    "venue": "Vila Belmiro",
+    "result": {
+      "homeScore": 0,
+      "awayScore": 1
+    },
+    "isFuture": false
+  },
+  {
+    "id": "br-2025-ceara",
+    "date": "2025-06-04",
+    "time": "20:00",
+    "competition": "CAMPEONATO BRASILEIRO",
+    "teams": {
+      "home": {
+        "name": "Botafogo",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/1200px-Botafogo_de_Futebol_e_Regatas_logo.svg.png",
+        "isBotafogo": true
+      },
+      "away": {
+        "name": "Ceará",
+        "logo": "https://logodetimes.com/times/ceara/logo-ceara-256.png",
+        "isBotafogo": false
+      }
+    },
+    "venue": "Estádio Nilton Santos",
+    "result": {
+      "homeScore": 3,
+      "awayScore": 2
+    },
+    "isFuture": false
+  },
+  {
+    "id": "cwc-2025-seattle",
+    "date": "2025-06-15",
+    "time": "23:00",
+    "competition": "COPA DO MUNDO DE CLUBES",
+    "teams": {
+      "home": {
+        "name": "Botafogo",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/1200px-Botafogo_de_Futebol_e_Regatas_logo.svg.png",
+        "isBotafogo": true
+      },
+      "away": {
+        "name": "Seattle Sounders",
+        "logo": "https://brandlogos.net/wp-content/uploads/2016/01/seattle_sounders_fc_2008-2023-logo_brandlogos.net_fppc0.png",
+        "isBotafogo": false
+      }
+    },
+    "venue": "Lumen Field",
+    "isFuture": true
+  },
+  {
+    "id": "cwc-2025-psg",
+    "date": "2025-06-19",
+    "time": "22:00",
+    "competition": "COPA DO MUNDO DE CLUBES",
+    "teams": {
+      "home": {
+        "name": "Paris Saint-Germain",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png",
+        "isBotafogo": false
+      },
+      "away": {
+        "name": "Botafogo",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/1200px-Botafogo_de_Futebol_e_Regatas_logo.svg.png",
+        "isBotafogo": true
+      }
+    },
+    "venue": "Rose Bowl",
+    "isFuture": true
+  },
+  {
+    "id": "cwc-2025-atletico",
+    "date": "2025-06-23",
+    "time": "16:00",
+    "competition": "COPA DO MUNDO DE CLUBES",
+    "teams": {
+      "home": {
+        "name": "Atlético de Madrid",
+        "logo": "https://1000logos.net/wp-content/uploads/2018/05/Atletico-Madrid-Logo.png",
+        "isBotafogo": false
+      },
+      "away": {
+        "name": "Botafogo",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/1200px-Botafogo_de_Futebol_e_Regatas_logo.svg.png",
+        "isBotafogo": true
+      }
+    },
+    "venue": "Rose Bowl",
+    "isFuture": true
+  }
+]

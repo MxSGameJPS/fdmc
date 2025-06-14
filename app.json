@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "fogao-do-meu-coracao",
+    "slug": "fogao-do-meu-coracao",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon-square.png",
+    "scheme": "fogaodomeucoracao",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserNotificationUsageDescription": "Precisamos enviar notificações para te avisar sobre novos conteúdos do canal."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon-square.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.mxsgamejps.fogaodomeucoracao",
+      "versionCode": 1
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/icon-square.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon-square.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a97f5be6-af9e-41f1-88a0-bedf0f7972d1"
+      }
+    },
+    "owner": "mxsgamejps"
+  }
+}
