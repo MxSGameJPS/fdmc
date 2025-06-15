@@ -1,26 +1,22 @@
 {
   "cli": {
-    "version": ">= 3.13.3",
-    "appVersionSource": "remote"
+    "version": ">= 0.60.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "gradleCommand": ":app:assembleDebug"
-      }
+      "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      }
+      "distribution": "internal"
     },
     "production": {
       "android": {
-        "buildType": "app-bundle" // Isso garante que um AAB será gerado
+        "buildType": "app-bundle"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }

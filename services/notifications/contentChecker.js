@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as rssParser from "react-native-rss-parser";
 import { sendLocalNotification } from "./notificationService";
+import { getLiveBotafogoMatch } from "../thesportsdb/botafogo";
 
 // Verificar conteúdo do YouTube
 export async function checkYouTubeContent() {
@@ -238,19 +239,138 @@ async function saveBlogPosts(posts) {
   }
 }
 
-// Verificar todos os conteúdos
+// Função para enviar uma notificação de teste
+export async function sendTestNotification() {
+  try {
+    console.log('Enviando notificação de teste...');
+    
+    const success = await sendLocalNotification(
+      "Notificação de Teste",
+      "As notificações estão configuradas corretamente! 🎉",
+      { 
+        type: "test", 
+        timestamp: new Date().toISOString() 
+      }
+    );
+    
+    console.log("Resultado do envio da notificação de teste:", success);
+    return success;
+  } catch (error) {
+    console.error("Erro ao enviar notificação de teste:", error);
+    return false;
+  }
+}
+
+// Verificar se há jogos ao vivo do Botafogo
+export async function checkLiveMatches() {
+  try {
+    console.log("Verificando jogos ao vivo...");
+
+    // Verificar se há jogos ao vivo
+    const liveMatch = await getLiveBotafogoMatch();
+
+    if (!liveMatch) {
+      console.log("Nenhum jogo ao vivo no momento.");
+      return false;
+    }
+
+    // Verificar se já notificamos sobre este jogo ao vivo
+    const lastNotifiedMatchId = await AsyncStorage.getItem("lastNotifiedLiveMatchId");
+
+    // Se for o mesmo jogo, verificar se houve gol
+    if (lastNotifiedMatchId === liveMatch.id) {
+      // Verificar se houve mudança no placar
+      const lastHomeScore = parseInt(await AsyncStorage.getItem("lastHomeScore") || "0");
+      const lastAwayScore = parseInt(await AsyncStorage.getItem("lastAwayScore") || "0");
+
+      const currentHomeScore = parseInt(liveMatch.teams.home.score || "0");
+      const currentAwayScore = parseInt(liveMatch.teams.away.score || "0");
+
+      // Se o placar mudou, notificar
+      if (currentHomeScore !== lastHomeScore || currentAwayScore !== lastAwayScore) {
+        // Determinar quem marcou
+        const botafogoScored =
+          (liveMatch.teams.home.isBotafogo && currentHomeScore > lastHomeScore) ||
+          (liveMatch.teams.away.isBotafogo && currentAwayScore > lastAwayScore);
+
+        const opponentScored =
+          (!liveMatch.teams.home.isBotafogo && currentHomeScore > lastHomeScore) ||
+          (!liveMatch.teams.away.isBotafogo && currentAwayScore > lastAwayScore);
+
+        let title = "Atualização de placar!";
+        let body = `${liveMatch.teams.home.name} ${currentHomeScore} x ${currentAwayScore} ${liveMatch.teams.away.name}`;
+
+        if (botafogoScored) {
+          title = "GOOOOOL DO FOGÃO! ⚽🔥";
+          body = `${liveMatch.teams.home.name} ${currentHomeScore} x ${currentAwayScore} ${liveMatch.teams.away.name}`;
+        } else if (opponentScored) {
+          title = "Gol do adversário";
+          body = `${liveMatch.teams.home.name} ${currentHomeScore} x ${currentAwayScore} ${liveMatch.teams.away.name}`;
+        }
+
+        // Enviar notificação
+        await sendLocalNotification(title, body, {
+          type: "live_match",
+          matchId: liveMatch.id,
+          homeScore: currentHomeScore,
+          awayScore: currentAwayScore,
+        });
+
+        // Atualizar placar salvo
+        await AsyncStorage.setItem("lastHomeScore", String(currentHomeScore));
+        await AsyncStorage.setItem("lastAwayScore", String(currentAwayScore));
+
+        return true;
+      }
+
+      return false; // Mesmo jogo, sem mudança no placar
+    }
+
+    // Novo jogo ao vivo, notificar
+    await sendLocalNotification(
+      "Jogo do Botafogo ao vivo! 🏁",
+      `${liveMatch.teams.home.name} vs ${liveMatch.teams.away.name} - Clique para assistir!`,
+      {
+        type: "live_match",
+        matchId: liveMatch.id,
+        homeScore: liveMatch.teams.home.score || 0,
+        awayScore: liveMatch.teams.away.score || 0,
+      }
+    );
+
+    // Salvar ID do jogo e placar inicial
+    await AsyncStorage.setItem("lastNotifiedLiveMatchId", liveMatch.id);
+    await AsyncStorage.setItem("lastHomeScore", String(liveMatch.teams.home.score || 0));
+    await AsyncStorage.setItem("lastAwayScore", String(liveMatch.teams.away.score || 0));
+
+    return true;
+  } catch (error) {
+    console.error("Erro ao verificar jogos ao vivo:", error);
+    return false;
+  }
+}
+
+// Modificar checkAllNewContent para incluir verificação de jogos ao vivo
 export async function checkAllNewContent() {
   try {
-    console.log("Verificando novos conteúdos...");
+    console.log("=== Iniciando verificação de novos conteúdos ===");
 
+    // Verificar jogos ao vivo (prioridade)
+    const liveMatchResult = await checkLiveMatches();
+    console.log(
+      "- Jogos ao vivo verificados:",
+      liveMatchResult ? "Atualização encontrada" : "Nada novo"
+    );
+
+    // Verificar outros conteúdos
     const youtubeResult = await checkYouTubeContent();
     const instagramResult = await checkInstagramContent();
     const blogResult = await checkBlogContent();
 
-    const hasAnyNewContent = youtubeResult || instagramResult || blogResult;
+    const hasAnyNewContent = liveMatchResult || youtubeResult || instagramResult || blogResult;
 
     console.log(
-      `Verificação concluída. Novos conteúdos encontrados: ${hasAnyNewContent}`
+      `=== Verificação concluída. Novos conteúdos encontrados: ${hasAnyNewContent} ===`
     );
 
     return hasAnyNewContent;

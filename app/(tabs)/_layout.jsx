@@ -1,52 +1,41 @@
-import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import { Tabs } from "expo-router";
-import { useEffect } from "react";
-import { checkAllNewContent } from "../../services/notifications/contentChecker";
+import { useColorScheme } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
-export default function TabsLayout() {
-  useEffect(() => {
-    // Verificar novos conteúdos ao abrir as tabs
-    checkAllNewContent();
+function TabBarIcon(props) {
+  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+}
 
-    // Verificar a cada 5 minutos enquanto o app estiver aberto
-    const interval = setInterval(() => {
-      checkAllNewContent();
-    }, 5 * 60 * 1000); // 5 minutos
+function TabBarIcon5(props) {
+  return <FontAwesome5 size={24} style={{ marginBottom: -3 }} {...props} />;
+}
 
-    return () => clearInterval(interval);
-  }, []);
+export default function TabLayout() {
+  const colorScheme = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#D1AC00",
-        tabBarInactiveTintColor: "#757575",
+        tabBarInactiveTintColor: "#FFFFFF",
         tabBarStyle: {
           backgroundColor: "#000000",
-          borderTopColor: "#222222",
+          borderTopColor: "#333333",
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
+        headerStyle: {
+          backgroundColor: "#000000",
         },
-        headerShown: false,
+        headerTintColor: "#FFFFFF",
       }}
     >
       <Tabs.Screen
         name="Home"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Jogos"
-        options={{
-          title: "Jogos",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="football" size={24} color={color} />
-          ),
+          title: "Início",
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -54,8 +43,29 @@ export default function TabsLayout() {
         options={{
           title: "Notícias",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="newspaper" size={24} color={color} />
+            <TabBarIcon name="newspaper-o" color={color} />
           ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="Jogos"
+        options={{
+          title: "Jogos",
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon5 name="calendar-alt" color={color} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="ClubWorldCup"
+        options={{
+          title: "Mundial",
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon5 name="trophy" color={color} />
+          ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -63,19 +73,29 @@ export default function TabsLayout() {
         options={{
           title: "YouTube",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="logo-youtube" size={24} color={color} />
+            <TabBarIcon name="youtube-play" color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="Instagram"
         options={{
-          title: "Insta",
+          title: "Instagram",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="logo-instagram" size={24} color={color} />
+            <TabBarIcon name="instagram" color={color} />
           ),
+          headerShown: false,
         }}
-      />     
+      />
+      <Tabs.Screen
+        name="Configuracoes"
+        options={{
+          title: "Mais",
+          tabBarIcon: ({ color }) => <TabBarIcon name="bars" color={color} />,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 }

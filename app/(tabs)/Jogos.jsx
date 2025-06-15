@@ -1,7 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 
-// Importar o novo serviço
+// Importar o serviço
 import {
   clearBotafogoCache,
   getUpcomingBotafogoMatches,
@@ -20,56 +20,34 @@ import {
 
 moment.locale("pt-br");
 
+
 export default function Jogos() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadMatches();
-  }, []);
-
+  // Função para carregar jogos
   const loadMatches = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      // Usar o novo serviço para obter jogos do site oficial
       const upcomingMatches = await getUpcomingBotafogoMatches();
-
-      if (upcomingMatches && upcomingMatches.length > 0) {
-        setMatches(upcomingMatches);
-      
-      } else {
-        // Se não encontrarmos jogos, mostrar uma mensagem mais amigável
-        setMatches([]);
-        setError("Não foi possível carregar os próximos jogos");
-      }
+      setMatches(upcomingMatches || []);
     } catch (error) {
       console.error("Erro ao carregar jogos:", error);
-
-      // Tentar usar dados mockados
-      try {
-        const mockMatches = getMockMatches();
-        setMatches(mockMatches);
-       
-
-        // Mostrar aviso, mas não como erro crítico
-        setError(
-          "Usando dados provisórios. Puxe para baixo para tentar novamente."
-        );
-      } catch (mockError) {
-        setMatches([]);
-        setError(
-          "Não foi possível carregar dados dos jogos. Tente novamente mais tarde."
-        );
-      }
+      setError(
+        "Não foi possível carregar os jogos. Puxe para baixo para tentar novamente."
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    loadMatches();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -77,11 +55,20 @@ export default function Jogos() {
     loadMatches();
   };
 
+  
+
+    // Verificar cada chave do objeto SOFASCORE_IDS
+  
+
+ 
+
   const renderMatchItem = ({ item }) => {
     // Formatar a data para exibição
     const matchDate = item.date
       ? moment(item.date).format("DD [de] MMMM [de] YYYY")
       : "";
+
+ 
 
     return (
       <View style={styles.matchCard}>
@@ -138,6 +125,8 @@ export default function Jogos() {
             </Text>
           </View>
         </View>
+
+        
       </View>
     );
   };
@@ -318,5 +307,36 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000000",
+  },
+  widgetContainer: {
+    marginTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#eeeeee",
+    paddingTop: 16,
+  },
+  widgetTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#D1AC00",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  webviewWrapper: {
+    height: 286,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  webview: {
+    flex: 1,
+  },
+  attributionContainer: {
+    marginTop: 8,
+    alignItems: "center",
+  },
+  attribution: {
+    fontSize: 12,
+    color: "#008fd7",
+    textDecorationLine: "underline",
   },
 });

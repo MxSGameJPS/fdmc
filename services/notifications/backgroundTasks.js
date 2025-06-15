@@ -1,6 +1,8 @@
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import { checkAllNewContent } from "./contentChecker";
+import * as Application from 'expo-application';
+import { Platform } from 'react-native';
 
 // Nome da tarefa em segundo plano
 const BACKGROUND_FETCH_TASK = "background-content-fetch";
@@ -23,6 +25,23 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   }
 });
 
+// Função para verificar a periodicidade no Android
+export async function checkAndroidBackgroundRestrictions() {
+  if (Platform.OS !== 'android') return true;
+  
+  try {
+    // Em versões mais novas do Android podemos verificar as restrições
+    const isBackgroundRestricted = await Application.getBackgroundActivityStatusAsync();
+    
+    console.log('Status de restrição de background no Android:', isBackgroundRestricted);
+    
+    return !isBackgroundRestricted;
+  } catch (error) {
+    console.error('Erro ao verificar restrições de background:', error);
+    return false;
+  }
+}
+
 // Registrar a tarefa em segundo plano
 export async function registerBackgroundFetchAsync() {
   try {
@@ -37,14 +56,23 @@ export async function registerBackgroundFetchAsync() {
       return;
     }
 
-    // Registrar a tarefa
+    // Registrar a tarefa com intervalo menor (para contornar limitações)
     await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: 15 * 60, // 15 minutos (em segundos)
+      minimumInterval: 900, // 15 minutos em segundos (reduza para testes)
       stopOnTerminate: false, // Continua após o app ser fechado
       startOnBoot: true, // Inicia após o dispositivo ser ligado
     });
 
     console.log("Tarefa em segundo plano registrada com sucesso!");
+    
+    // Para Android, verificar restrições de bateria
+    if (Platform.OS === 'android') {
+      const isNotRestricted = await checkAndroidBackgroundRestrictions();
+      if (!isNotRestricted) {
+        console.warn("O app pode ter restrições de bateria que limitam as tarefas em segundo plano");
+        // Aqui você poderia mostrar uma dialog instruindo o usuário a desativar a otimização de bateria
+      }
+    }
   } catch (error) {
     console.error("Erro ao registrar tarefa em segundo plano:", error);
   }

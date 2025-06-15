@@ -19,3 +19,6 @@ export {
   registerBackgroundFetchAsync,
   unregisterBackgroundFetchAsync,
 } from "./backgroundTasks";
+
+// Exportar função de setup
+export { setupNotifications } from "./setup";

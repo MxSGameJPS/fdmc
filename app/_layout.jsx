@@ -12,16 +12,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     // Inicializar notificações
-    const setupNotifications = async () => {
+    const initNotifications = async () => {
       // Registrar para notificações push
       await registerForPushNotificationsAsync();
 
       // Configurar listeners de notificações
       notificationListeners.current = setupNotificationListeners(
         // Quando uma notificação é recebida com o app aberto
-        (notification) => {
-        
-        },
+        (notification) => {},
         // Quando o usuário toca em uma notificação
         (response) => {
           const data = response.notification.request.content.data;
@@ -41,7 +39,7 @@ export default function RootLayout() {
       await registerBackgroundFetchAsync();
     };
 
-    setupNotifications();
+    initNotifications();
 
     // Limpar listeners quando o componente for desmontado
     return () => {
