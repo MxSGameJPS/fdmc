@@ -4,12 +4,15 @@ import { Ionicons } from "@expo/vector-icons";
 import InstagramFeed from "../../components/InstagramFeed";
 import YouTubeFeed from "../../components/YouTubeFeed";
 import BlogFeed from "../../components/BlogFeed";
+import BrasileiraoWidget from "../../components/BrasileiraoWidget";
 
 export default function Home() {
   // Funções para navegar para as páginas completas
-  const navigateToYouTube = () => router.push("/(tabs)/YouTube");
-  const navigateToInstagram = () => router.push("/(tabs)/Instagram");
+  const navigateToYouTube = () => router.push("/(tabs)/Midia");
+  const navigateToInstagram = () => router.push("/(tabs)/Midia");
   const navigateToBlog = () => router.push("/(tabs)/Blog");
+  const navigateToBrasileirao = () => router.push("/(tabs)/Competicoes");
+  const navigateToJogos = () => router.push("/(tabs)/Jogos");
 
   return (
     <ScrollView style={styles.container}>
@@ -17,7 +20,7 @@ export default function Home() {
         <Text style={styles.headerTitle}>Fogão do Meu Coração</Text>
       </View>
 
-       {/* Seção do Blog - 3 posts mais recentes */}
+      {/* Seção do Blog - 3 posts mais recentes */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Notícias</Text>
@@ -28,9 +31,7 @@ export default function Home() {
         </View>
         <BlogFeed limit={3} showTitle={false} showViewMore={false} />
       </View>
-      
-      
-      
+
       {/* Seção do YouTube - 3 vídeos mais recentes */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -42,21 +43,57 @@ export default function Home() {
         </View>
         <YouTubeFeed limit={3} showTitle={false} showViewMore={false} />
       </View>
-      
+
       {/* Seção do Instagram - 3 posts mais recentes */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Instagram</Text>
-          <Pressable onPress={navigateToInstagram} style={styles.viewMoreButton}>
+          <Pressable
+            onPress={navigateToInstagram}
+            style={styles.viewMoreButton}
+          >
             <Text style={styles.viewMoreText}>Ver mais</Text>
             <Ionicons name="arrow-forward" size={16} color="#666" />
           </Pressable>
         </View>
         <InstagramFeed limit={3} showTitle={false} showViewMore={false} />
       </View>
-      
-     
-      
+
+      {/* Seção do Brasileirão */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Brasileirão 2025</Text>
+          <Pressable
+            onPress={navigateToBrasileirao}
+            style={styles.viewMoreButton}
+          >
+            <Text style={styles.viewMoreText}>Ver classificação</Text>
+            <Ionicons name="arrow-forward" size={16} color="#666" />
+          </Pressable>
+        </View>
+        <BrasileiraoWidget height={300} showHeader={false} showFooter={false} />
+      </View>
+
+      {/* Seção Próximos Jogos */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Próximos Jogos</Text>
+          <Pressable onPress={navigateToJogos} style={styles.viewMoreButton}>
+            <Text style={styles.viewMoreText}>Ver calendário</Text>
+            <Ionicons name="arrow-forward" size={16} color="#666" />
+          </Pressable>
+        </View>
+        <View style={styles.jogosInfo}>
+          <Text style={styles.jogosText}>
+            Calendário atualizado com os próximos 9 jogos
+          </Text>
+          <Text style={styles.jogosText}>
+            Inclui partidas do Brasileirão, Copa do Brasil e Libertadores
+          </Text>
+          <Text style={styles.jogosUpdate}>Atualizado em: 10/07/2025</Text>
+        </View>
+      </View>
+
       {/* Espaço no final da página */}
       <View style={styles.footer} />
     </ScrollView>
@@ -108,5 +145,24 @@ const styles = StyleSheet.create({
   },
   footer: {
     height: 40,
-  }
+  },
+  jogosInfo: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: 8,
+    padding: 16,
+    marginHorizontal: 16,
+  },
+  jogosText: {
+    color: "#CCCCCC",
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  jogosUpdate: {
+    color: "#D1AC00",
+    fontSize: 12,
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 8,
+  },
 });

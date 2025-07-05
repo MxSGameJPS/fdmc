@@ -16,7 +16,7 @@ export default function InstagramFeed() {
     try {
       setLoading(true);
       // Feed RSS do Instagram que você criou no RSS.app
-      const rssFeedUrl = 'https://rss.app/feeds/DlcJyIwzZWwEy4Uu.xml';
+      const rssFeedUrl = 'https://rss.app/feeds/YpLRvnez80QZoeKK.xml';
       
       const response = await fetch(rssFeedUrl);
       const responseText = await response.text();

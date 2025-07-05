@@ -1,4 +1,210 @@
-Fogão do Meu Coração - Versão 1.0.0
+Fogão do Meu Coração - Versão 3.0.1 (4/07/2025)
+
+� Correção urgente para o sistema de autenticação
+
+Mudanças nesta versão:
+
+✅ Corrigido problema crítico que causava o fechamento do app nas telas de login/cadastro
+✅ Implementado sistema de diagnóstico de problemas de autenticação
+✅ Adicionadas verificações de integridade para os serviços Firebase
+✅ Melhorado o tratamento de erros durante o login e cadastro
+✅ Adicionadas permissões necessárias para o funcionamento completo do app
+✅ Logs detalhados para diagnóstico e resolução de problemas
+✅ Opção para diagnóstico e recuperação manual em caso de falha
+
+Esta atualização resolve problemas críticos reportados por usuários após a atualização para a versão 3.0.0.
+
+#FogãoDoMeuCoração ⭐ #CorrecaoUrgente #Autenticacao
+
+---
+
+Fogão do Meu Coração - Versão 3.0.0 (3/07/2025)
+
+🚀 Navegação simplificada e sistema inteligente de cache
+
+Mudanças nesta versão:
+
+✅ Design aprimorado da barra de navegação com apenas 6 abas principais
+✅ Módulo de competições renovado com melhor navegação e desempenho
+✅ Sistema inteligente de YouTube com cache avançado para economia de dados/cotas
+✅ Novas configurações de notificações personalizáveis por tipo de conteúdo
+✅ Tela "Sobre o Aplicativo" com informações e contato do desenvolvedor
+✅ Botão de compartilhamento para divulgar o app entre amigos
+✅ Corrigido problema com a barra de navegação que exibia abas desnecessárias
+✅ Resolvido problema de limite de cotas da API do YouTube
+✅ Sistema de cache aprimorado para funcionamento offline
+✅ Navegação mais intuitiva entre telas de competições
+✅ Desempenho otimizado para todos os dispositivos
+
+#FogãoDoMeuCoração ⭐ #NovaNavegacao #CacheInteligente
+
+---
+
+Fogão do Meu Coração - Versão 1.2.5 (31/07/2025)
+
+🛠️ Correção crítica e melhorias de estabilidade
+
+Mudanças nesta versão:
+
+✅ Corrigido erro crítico de compilação no componente YouTubeFeed
+✅ Tratamento mais robusto para respostas da API do YouTube
+✅ Melhor gerenciamento de dados offline quando API indisponível
+✅ Otimização do tratamento de erros em todo o app
+✅ Melhor experiência quando em modo offline
+
+Esta atualização corrige um problema crítico que impedia o app de funcionar em alguns dispositivos e melhora a estabilidade geral do aplicativo em condições de rede variáveis.
+
+#FogãoDoMeuCoração ⭐ #Estabilidade #Robustez
+
+---
+
+Fogão do Meu Coração - Versão 1.2.4 (29/07/2025)
+
+🔄 Otimização de performance e economia de dados
+
+Mudanças nesta versão:
+
+✅ Armazenamento em cache de dados da API do YouTube
+✅ Redução do consumo de cotas da API do YouTube
+✅ Dados offline para funcionamento sem internet
+✅ Atualizações em segundo plano para melhor experiência
+✅ Otimização do carregamento de conteúdo de mídia
+
+Esta atualização melhora significativamente a performance do aplicativo, reduzindo o consumo de dados e permitindo o acesso ao conteúdo mesmo com conexão limitada ou quotas de API esgotadas.
+
+#FogãoDoMeuCoração ⭐ #Otimização #Performance
+
+---
+
+Fogão do Meu Coração - Versão 1.2.3 (28/07/2025)
+
+🔄 Correções de navegação na mídia social
+
+Mudanças nesta versão:
+
+✅ Corrigidos links para YouTube e Instagram na aba Mídia
+✅ Criadas novas telas dedicadas para conteúdo de mídia social
+✅ Adicionados botões de voltar em todas as telas de mídia
+✅ Melhor integração com os componentes de feed
+✅ Interface unificada para todas as fontes de conteúdo
+
+Esta atualização melhora a experiência de navegação do aplicativo, com ajustes finos na tela de competições e correção de problemas de layout.
+
+#FogãoDoMeuCoração ⭐ #MelhoriaContínua
+
+---
+
+Fogão do Meu Coração - Versão 1.2.0 (24/07/2025)
+
+🔄 Modernização da navegação do app
+
+Mudanças nesta versão:
+
+✅ Nova navegação centralizada para competições
+✅ Aba única "Competições" com menu para todas as competições
+✅ Aba "Mídia" reunindo YouTube e Instagram
+✅ Aba "Mais" com configurações e personalizações
+✅ Interface modernizada com cards de navegação
+✅ Melhor experiência de navegação em dispositivos de todos os tamanhos
+✅ Estrutura mais escalável para adição de futuras competições
+
+Esta atualização reorganiza completamente a navegação do aplicativo, tornando-o mais intuitivo e eficiente. A nova estrutura facilita o acesso a todas as competições em um único local e melhora a usabilidade em dispositivos com telas de diversos tamanhos.
+
+#FogãoDoMeuCoração ⭐ #NovaExperiência
+
+---
+
+Fogão do Meu Coração - Versão 1.1.4 (12/07/2025)
+
+🔄 Adição da Aba Copa do Brasil
+
+Mudanças nesta versão:
+
+✅ Nova aba exclusiva para a Copa do Brasil
+✅ Visualização do chaveamento da fase eliminatória
+✅ Integração com widget do SofaScore para dados em tempo real
+✅ Acompanhamento da campanha do Botafogo na Copa do Brasil
+✅ Interface otimizada para visualização do torneio
+
+Esta atualização amplia o acompanhamento das competições nacionais, permitindo aos usuários visualizar o chaveamento completo da Copa do Brasil 2025 em tempo real.
+
+#FogãoDoMeuCoração ⭐ #CopaDoBrasil2025
+
+---
+
+Fogão do Meu Coração - Versão 1.1.3 (12/07/2025)
+
+🔄 Adição da Aba Libertadores
+
+Mudanças nesta versão:
+
+✅ Nova aba exclusiva para a CONMEBOL Libertadores
+✅ Visualização do chaveamento da fase eliminatória
+✅ Integração com widget do SofaScore para dados em tempo real
+✅ Acompanhamento da campanha do Botafogo na Libertadores
+✅ Interface otimizada para visualização do torneio
+
+Esta atualização adiciona uma nova funcionalidade muito requisitada pelos usuários, permitindo acompanhar o chaveamento da Libertadores 2025 em tempo real.
+
+#FogãoDoMeuCoração ⭐ #Libertadores2025
+
+---
+
+Fogão do Meu Coração - Versão 1.1.2 (12/07/2025)
+
+🔄 Atualização do Brasileirão
+
+Mudanças nesta versão:
+
+✅ Retorno do widget SofaScore para a tabela do Brasileirão
+✅ Dados da classificação atualizados em tempo real
+✅ Interface oficial do SofaScore para melhor visualização
+✅ Melhor visualização das estatísticas dos times
+✅ Correções de performance e carregamento
+
+Esta atualização volta a utilizar a fonte oficial do SofaScore para os dados do Brasileirão, garantindo informações em tempo real e interface profissional.
+
+#FogãoDoMeuCoração ⭐
+
+---
+
+Fogão do Meu Coração - Versão 1.1.1 (12/07/2025)
+
+🔄 Atualização de visual
+
+Mudanças nesta versão:
+
+✅ Atualização dos escudos dos times na classificação do Brasileirão
+✅ Uso de imagens oficiais e de alta qualidade
+✅ Padronização visual com a tela de jogos
+✅ Melhorias na apresentação dos dados
+✅ Correções visuais menores
+
+Esta atualização visa melhorar a experiência visual do usuário, com escudos padronizados e de alta qualidade.
+
+#FogãoDoMeuCoração ⭐
+
+---
+
+Fogão do Meu Coração - Versão 1.1.0 (10/07/2025)
+
+🔄 Atualização de interface do Brasileirão
+
+Mudanças nesta versão:
+
+✅ Simplificação da tela do Brasileirão, com foco exclusivo na classificação
+✅ Remoção da exibição de jogos para uma interface mais direta
+✅ Uso exclusivo do widget SofaScore para dados em tempo real
+✅ Melhor desempenho e dados sempre atualizados
+✅ Correções de bugs e melhorias de estabilidade
+
+Esta atualização visa melhorar a experiência do usuário, oferecendo uma visualização mais limpa e dados sempre atualizados sobre o Campeonato Brasileiro.
+
+#FogãoDoMeuCoração ⭐
+
+---
+
+Fogão do Meu Coração - Versão 1.0.0 (15/06/2025)
 
 🚀 Lançamento inicial do aplicativo Fogão do Meu Coração!
 

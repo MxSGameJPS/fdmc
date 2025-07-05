@@ -1,6 +1,4 @@
-import React from "react";
 import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
@@ -13,8 +11,6 @@ function TabBarIcon5(props) {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
@@ -59,9 +55,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="ClubWorldCup"
+        name="Competicoes"
         options={{
-          title: "Mundial",
+          title: "Competições",
           tabBarIcon: ({ color }) => (
             <TabBarIcon5 name="trophy" color={color} />
           ),
@@ -69,21 +65,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="YouTube"
+        name="Midia"
         options={{
-          title: "YouTube",
+          title: "Mídia",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="youtube-play" color={color} />
-          ),
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="Instagram"
-        options={{
-          title: "Instagram",
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="instagram" color={color} />
+            <TabBarIcon name="play-circle" color={color} />
           ),
           headerShown: false,
         }}

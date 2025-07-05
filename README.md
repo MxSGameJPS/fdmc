@@ -48,3 +48,19 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Módulos do Aplicativo
+
+O aplicativo é composto por várias abas, cada uma com uma funcionalidade específica:
+
+### Brasileirão
+
+A aba Brasileirão exibe a classificação atualizada do Campeonato Brasileiro Série A 2025 através de um widget do SofaScore.
+
+- **Características**:
+  - Classificação em tempo real via SofaScore
+  - Interface limpa e direta focada apenas na tabela de classificação
+  - Atualização automática dos dados ao puxar para baixo (pull-to-refresh)
+  - Link direto para a página completa do SofaScore
+
+Para mais detalhes sobre a implementação, consulte o arquivo `docs/BRASILEIRAO-DADOS.md`.

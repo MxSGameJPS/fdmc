@@ -1,0 +1,73 @@
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
+
+// Criando um contexto para o Firebase
+export const FirebaseContext = createContext(null);
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCeKD2RYMGN9cl9fK7UNeD_Q8tIg8BA1sI",
+  authDomain: "fdmc-d437a.firebaseapp.com",
+  databaseURL: "https://fdmc-d437a-default-rtdb.firebaseio.com",
+  projectId: "fdmc-d437a",
+  storageBucket: "fdmc-d437a.firebasestorage.app",
+  messagingSenderId: "284919922147",
+  appId: "1:284919922147:web:17ae7d938ce250c13534d6",
+};
+
+// Inicializando Firebase fora do componente (no escopo do módulo)
+let app, auth, database;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  database = getDatabase(app);
+  console.log("Firebase inicializado com sucesso no escopo do módulo!");
+} catch (error) {
+  console.error("Erro ao inicializar Firebase:", error);
+}
+
+export function FirebaseProvider({ children }) {
+  const [isInitialized, setIsInitialized] = useState(!!auth && !!database);
+
+  useEffect(() => {
+    // Verificar se o Firebase já foi inicializado
+    if (!app) {
+      try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        database = getDatabase(app);
+        console.log("Firebase inicializado dentro do useEffect!");
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Erro ao inicializar Firebase no useEffect:", error);
+        setIsInitialized(false);
+      }
+    } else {
+      setIsInitialized(true);
+    }
+  }, []);
+
+  // Fornecendo os serviços Firebase via contexto
+  const value = {
+    app,
+    auth,
+    database,
+    isInitialized,
+  };
+
+  return (
+    <FirebaseContext.Provider value={value}>
+      {children}
+    </FirebaseContext.Provider>
+  );
+}
+
+// Hook personalizado para acessar o contexto do Firebase
+export function useFirebase() {
+  const context = useContext(FirebaseContext);
+  if (!context) {
+    throw new Error("useFirebase deve ser usado dentro de um FirebaseProvider");
+  }
+  return context;
+}

@@ -1,21 +1,63 @@
 import { router } from "expo-router";
-import { useEffect } from "react";
-import { ImageBackground, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ImageBackground,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Text,
+} from "react-native";
 import Botao from "../components/botao";
 import { clearFootballCache } from "../services/football/api";
 import { initializeContentTracking } from "../services/initialSetup";
 import { setupNotifications } from "../services/notifications/setup";
+import { checkAuthState } from "../services/firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
+  const [verificandoAuth, setVerificandoAuth] = useState(true);
+
+  // Verificar o estado da autenticação
+  useEffect(() => {
+    const verificarAutenticacao = async () => {
+      try {
+        // Verificar se o usuário está logado
+        const user = await checkAuthState();
+
+        if (user) {
+          // Verificar se a opção "manter conectado" está ativa
+          const manterConectado = await AsyncStorage.getItem("manterConectado");
+
+          if (manterConectado === "true") {
+            console.log(
+              "Usuário autenticado e optou por manter-se conectado, redirecionando..."
+            );
+            router.replace("/(tabs)/Home");
+          } else {
+            console.log(
+              "Usuário autenticado, mas não optou por manter-se conectado"
+            );
+          }
+        } else {
+          console.log("Nenhum usuário autenticado");
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error);
+      } finally {
+        setVerificandoAuth(false);
+      }
+    };
+
+    verificarAutenticacao();
+  }, []);
+
   useEffect(() => {
     // Inicializar o rastreamento de conteúdo
     initializeContentTracking();
-  }, []);
-
-  useEffect(() => {
     // Limpar cache para forçar o uso do novo ID
     clearFootballCache();
   }, []);
+
   useEffect(() => {
     // Configurar notificações
     try {
@@ -49,7 +91,14 @@ export default function Index() {
       resizeMode="cover"
     >
       <View style={styles.container}>
-        <Botao onPress={() => router.push("/(tabs)/Home")} />
+        {verificandoAuth ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#D1AC00" />
+            <Text style={styles.loadingText}>Verificando autenticação...</Text>
+          </View>
+        ) : (
+          <Botao />
+        )}
       </View>
     </ImageBackground>
   );
@@ -66,5 +115,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center", // Centraliza verticalmente
     alignItems: "center", // Centraliza horizontalmente
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    color: "#FFFFFF",
+    marginTop: 16,
+    fontSize: 16,
   },
 });

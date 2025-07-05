@@ -9,10 +9,14 @@
     },
     "preview": {
       "distribution": "internal"
-    },
-    "production": {
+    },    "production": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": false
+      },
+      "autoIncrement": false,
+      "env": {
+        "EXPO_USE_LOCAL_APP_VERSION": "3"
       }
     }
   },

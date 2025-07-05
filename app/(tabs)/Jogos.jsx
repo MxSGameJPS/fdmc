@@ -12,33 +12,48 @@ import {
   View,
 } from "react-native";
 
-// Importar o serviço
-import {
-  clearBotafogoCache,
-  getUpcomingBotafogoMatches,
-} from "../../services/botafogo/calendar";
+// Importar os dados estáticos
+import jogosData from "../../assets/data/botafogo-jogos-2025.json";
 
 moment.locale("pt-br");
 
-
 export default function Jogos() {
-  const [matches, setMatches] = useState([]);
+  const [jogos, setJogos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // Função para carregar jogos
-  const loadMatches = async () => {
+  // Função para carregar jogos dos dados estáticos
+  const carregarJogos = () => {
     try {
       setLoading(true);
       setError(null);
-      const upcomingMatches = await getUpcomingBotafogoMatches();
-      setMatches(upcomingMatches || []);
+
+      // Preparar os jogos no formato necessário para o FlatList
+      const jogosProcessados = jogosData.jogos.map((jogo, index) => ({
+        id: `jogo-${index}`,
+        date: jogo.data,
+        time: jogo.hora,
+        competition: jogo.competicao,
+        venue: jogo.local,
+        teams: {
+          home: {
+            name: jogo.mandante.nome,
+            logo: jogo.mandante.escudo,
+            isBotafogo: jogo.mandante.nome === "Botafogo",
+          },
+          away: {
+            name: jogo.visitante.nome,
+            logo: jogo.visitante.escudo,
+            isBotafogo: jogo.visitante.nome === "Botafogo",
+          },
+        },
+      }));
+
+      setJogos(jogosProcessados);
     } catch (error) {
       console.error("Erro ao carregar jogos:", error);
-      setError(
-        "Não foi possível carregar os jogos. Puxe para baixo para tentar novamente."
-      );
+      setError("Não foi possível carregar os jogos. Tente novamente.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -46,21 +61,15 @@ export default function Jogos() {
   };
 
   useEffect(() => {
-    loadMatches();
+    carregarJogos();
   }, []);
 
-  const onRefresh = async () => {
+  const onRefresh = () => {
     setRefreshing(true);
-    await clearBotafogoCache();
-    loadMatches();
+    carregarJogos();
   };
 
-  
-
-    // Verificar cada chave do objeto SOFASCORE_IDS
-  
-
- 
+  // Verificar cada chave do objeto SOFASCORE_IDS
 
   const renderMatchItem = ({ item }) => {
     // Formatar a data para exibição
@@ -68,12 +77,18 @@ export default function Jogos() {
       ? moment(item.date).format("DD [de] MMMM [de] YYYY")
       : "";
 
- 
+    // Definir estilo especial para competições internacionais
+    const isInternational =
+      item.competition.includes("Libertadores") ||
+      item.competition.includes("CONMEBOL");
+    const competitionStyle = isInternational
+      ? styles.internationalCompetition
+      : styles.competitionName;
 
     return (
       <View style={styles.matchCard}>
         <View style={styles.matchHeader}>
-          <Text style={styles.competitionName}>{item.competition}</Text>
+          <Text style={competitionStyle}>{item.competition}</Text>
           <Text style={styles.matchDate}>
             {matchDate} • {item.time}
           </Text>
@@ -84,9 +99,7 @@ export default function Jogos() {
           <View style={styles.teamInfo}>
             <Image
               source={{
-                uri:
-                  item.teams.home.logo ||
-                  "https://www.botafogo.com.br/img/escudo.png",
+                uri: item.teams.home.logo,
               }}
               style={styles.teamLogo}
               resizeMode="contain"
@@ -108,9 +121,7 @@ export default function Jogos() {
           <View style={styles.teamInfo}>
             <Image
               source={{
-                uri:
-                  item.teams.away.logo ||
-                  "https://www.botafogo.com.br/img/escudo.png",
+                uri: item.teams.away.logo,
               }}
               style={styles.teamLogo}
               resizeMode="contain"
@@ -125,8 +136,6 @@ export default function Jogos() {
             </Text>
           </View>
         </View>
-
-        
       </View>
     );
   };
@@ -145,7 +154,9 @@ export default function Jogos() {
       <StatusBar style="light" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Próximos Jogos</Text>
-        <Text style={styles.headerSubtitle}>Dados oficiais do Botafogo</Text>
+        <Text style={styles.headerSubtitle}>
+          Calendário Oficial - Próximos 9 jogos
+        </Text>
       </View>
 
       {error ? (
@@ -158,7 +169,7 @@ export default function Jogos() {
       ) : null}
 
       <FlatList
-        data={matches}
+        data={jogos}
         renderItem={renderMatchItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.matchesContainer}
@@ -180,6 +191,12 @@ export default function Jogos() {
           ) : null
         }
       />
+      <View style={styles.footerInfo}>
+        <Text style={styles.footerText}>Atualizado em: 10/07/2025</Text>
+        <Text style={styles.footerText}>
+          Dados oficiais do Botafogo - Próximos 9 jogos
+        </Text>
+      </View>
     </View>
   );
 }
@@ -266,6 +283,12 @@ const styles = StyleSheet.create({
     color: "#D1AC00",
     marginBottom: 4,
   },
+  internationalCompetition: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#3B7AC4", // Azul para competições internacionais
+    marginBottom: 4,
+  },
   matchDate: {
     fontSize: 14,
     color: "#000000",
@@ -338,5 +361,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#008fd7",
     textDecorationLine: "underline",
+  },
+  footerInfo: {
+    marginTop: 16,
+    alignItems: "center",
+    marginBottom: 30,
+    paddingHorizontal: 16,
+  },
+  footerText: {
+    fontSize: 12,
+    color: "#888888",
+    textAlign: "center",
+    marginBottom: 4,
   },
 });

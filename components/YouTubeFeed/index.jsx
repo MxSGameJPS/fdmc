@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Card from "../card";
 
 export default function YouTubeFeed({
@@ -21,56 +22,236 @@ export default function YouTubeFeed({
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchYouTubeVideos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadVideos();
   }, []);
 
-  const fetchYouTubeVideos = async () => {
-    try {
-      setLoading(true);
+  // Função para carregar vídeos, primeiro tentando do cache
+  const loadVideos = async () => {
+    setLoading(true);
 
-      // ID do canal do YouTube e API Key fornecidos
-      const channelId = "UCGYyVRxyMn-7YuConcWEqYQ";
+    try {
+      // Tenta carregar do cache primeiro
+      const cachedVideos = await getCachedVideos();
+
+      if (cachedVideos && cachedVideos.length > 0) {
+        console.log("Usando vídeos em cache");
+        setVideos(limit ? cachedVideos.slice(0, limit) : cachedVideos);
+        setError(null);
+        setLoading(false);
+
+        // Verifica se o cache está obsoleto (mais de 6 horas)
+        const cacheInfo = await AsyncStorage.getItem("youtube_cache_timestamp");
+        if (cacheInfo) {
+          const cacheTimestamp = parseInt(cacheInfo);
+          const hoursElapsed = (Date.now() - cacheTimestamp) / (1000 * 60 * 60);
+
+          // Se o cache tiver mais de 6 horas, atualize em segundo plano
+          if (hoursElapsed > 6) {
+            console.log("Cache obsoleto, atualizando em segundo plano");
+            fetchYouTubeVideosInBackground();
+          }
+        }
+      } else {
+        // Se não houver cache, busque normalmente
+        await fetchYouTubeVideos();
+      }
+    } catch (error) {
+      console.error("Erro ao carregar vídeos:", error);
+      await fetchYouTubeVideos();
+    }
+  };
+
+  // Função para obter vídeos do cache
+  const getCachedVideos = async () => {
+    try {
+      const cachedData = await AsyncStorage.getItem("youtube_videos_cache");
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+      return null;
+    } catch (error) {
+      console.error("Erro ao ler cache:", error);
+      return null;
+    }
+  };
+
+  // Função para obter IDs de vídeos do cache
+  const getCachedVideoIds = async () => {
+    try {
+      const cachedIds = await AsyncStorage.getItem("youtube_video_ids_cache");
+      if (cachedIds) {
+        return JSON.parse(cachedIds);
+      }
+      return null;
+    } catch (error) {
+      console.error("Erro ao ler cache de IDs:", error);
+      return null;
+    }
+  };
+
+  // Função para salvar vídeos no cache
+  const saveVideosToCache = async (videos) => {
+    try {
+      await AsyncStorage.setItem(
+        "youtube_videos_cache",
+        JSON.stringify(videos)
+      );
+      await AsyncStorage.setItem(
+        "youtube_cache_timestamp",
+        Date.now().toString()
+      );
+    } catch (error) {
+      console.error("Erro ao salvar cache:", error);
+    }
+  };
+
+  // Função para salvar IDs de vídeos no cache
+  const saveVideoIdsToCache = async (videoIds) => {
+    try {
+      await AsyncStorage.setItem(
+        "youtube_video_ids_cache",
+        JSON.stringify(videoIds)
+      );
+      await AsyncStorage.setItem(
+        "youtube_ids_cache_timestamp",
+        Date.now().toString()
+      );
+    } catch (error) {
+      console.error("Erro ao salvar cache de IDs:", error);
+    }
+  };
+
+  // Função para buscar vídeos em segundo plano sem afetar a UI
+  const fetchYouTubeVideosInBackground = async () => {
+    try {
+      await fetchYouTubeVideos(true);
+    } catch (error) {
+      console.error("Erro ao atualizar vídeos em segundo plano:", error);
+      // Não definimos o estado de erro para não afetar a UI
+    }
+  };
+
+  const fetchYouTubeVideos = async (isBackgroundUpdate = false) => {
+    if (!isBackgroundUpdate) {
+      setLoading(true);
+    }
+
+    try {
+      // ID da API Key
       const apiKey = "AIzaSyAWMupTOwaGu6aAC2cdPeOWato6pZj6piM";
 
-      const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=20&type=video`;
+      // Estratégia de 2 etapas para economizar cotas:
+      // 1. Obter os IDs dos vídeos (do cache ou da API)
+      // 2. Buscar detalhes dos vídeos usando endpoint /videos (mais econômico)
 
-      const response = await fetch(url);
-      const data = await response.json();
+      let videoIds = [];
 
-      if (data.error) {
-        throw new Error(data.error.message);
+      // Tentar obter IDs do cache primeiro
+      const cachedIds = await getCachedVideoIds();
+      const idsNeedUpdate = !cachedIds || cachedIds.length === 0;
+
+      // Se precisar atualizar IDs ou não tiver no cache, buscar da API
+      if (idsNeedUpdate) {
+        console.log("Buscando novos IDs de vídeos da playlist");
+
+        // Usar playlistItems para obter apenas os IDs (consome apenas 1 cota)
+        const playlistId = "UUGYyVRxyMn-7YuConcWEqYQ"; // Playlist de uploads (U + channelId)
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&playlistId=${playlistId}&part=snippet&maxResults=20&fields=items(snippet/resourceId/videoId)`;
+
+        const playlistResponse = await fetch(playlistUrl);
+        const playlistData = await playlistResponse.json();
+
+        if (playlistData.error) {
+          throw new Error(playlistData.error.message);
+        }
+
+        // Extrair apenas os IDs dos vídeos
+        videoIds = playlistData.items
+          .filter(
+            (item) =>
+              item.snippet &&
+              item.snippet.resourceId &&
+              item.snippet.resourceId.videoId
+          )
+          .map((item) => item.snippet.resourceId.videoId);
+
+        // Salvar IDs no cache para uso futuro
+        if (videoIds.length > 0) {
+          await saveVideoIdsToCache(videoIds);
+        } else {
+          throw new Error("Não foi possível obter IDs de vídeos");
+        }
+      } else {
+        console.log("Usando IDs de vídeos do cache");
+        videoIds = cachedIds;
       }
 
-      const formattedVideos = data.items.map((item) => ({
-        id: item.id.videoId,
-        title: item.snippet.title,
-        content:
-          item.snippet.description ||
-          "Assista a este vídeo no canal Fogão do Meu Coração.",
-        imagem: item.snippet.thumbnails.high.url,
-        link: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        date: new Date(item.snippet.publishedAt),
-      }));
+      // Agora, com os IDs em mãos, usar o endpoint /videos para obter detalhes
+      // Este endpoint é mais econômico em termos de cotas
+      if (videoIds.length > 0) {
+        console.log(`Buscando detalhes de ${videoIds.length} vídeos`);
 
-      // Limite o número de vídeos se a propriedade limit for fornecida
-      const limitedVideos = limit
-        ? formattedVideos.slice(0, limit)
-        : formattedVideos;
+        const videosUrl = `https://www.googleapis.com/youtube/v3/videos?key=${apiKey}&id=${videoIds.join(
+          ","
+        )}&part=snippet,contentDetails,statistics&maxResults=${
+          videoIds.length
+        }`;
 
-      setVideos(limitedVideos);
-      setError(null);
+        const videosResponse = await fetch(videosUrl);
+        const videosData = await videosResponse.json();
 
-   
+        if (videosData.error) {
+          throw new Error(videosData.error.message);
+        }
+
+        const formattedVideos = videosData.items.map((item) => {
+          return {
+            id: item.id,
+            title: item.snippet?.title || "Vídeo sem título",
+            content:
+              item.snippet?.description ||
+              "Assista a este vídeo no canal Fogão do Meu Coração.",
+            imagem:
+              item.snippet?.thumbnails?.high?.url ||
+              item.snippet?.thumbnails?.default?.url ||
+              "https://via.placeholder.com/480x360?text=Video+indisponível",
+            link: `https://www.youtube.com/watch?v=${item.id}`,
+            date: new Date(item.snippet?.publishedAt || new Date()),
+            // Informações adicionais disponíveis na API /videos
+            viewCount: item.statistics?.viewCount,
+            duration: item.contentDetails?.duration,
+          };
+        });
+
+        // Limite o número de vídeos se a propriedade limit for fornecida
+        const limitedVideos = limit
+          ? formattedVideos.slice(0, limit)
+          : formattedVideos;
+
+        setVideos(limitedVideos);
+        setError(null);
+
+        // Salvar no cache para uso futuro
+        await saveVideosToCache(formattedVideos);
+      } else {
+        throw new Error("Lista de IDs de vídeos vazia");
+      }
     } catch (error) {
       console.error("Erro ao buscar vídeos do YouTube:", error);
-      setError(
-        "Não foi possível carregar os vídeos do YouTube. Tente novamente mais tarde."
-      );
 
-      // Se a API falhar, tente o método de RSS como fallback
-      fetchYouTubeVideosViaRSS();
+      if (!isBackgroundUpdate) {
+        setError(
+          "Não foi possível carregar os vídeos do YouTube. Tente novamente mais tarde."
+        );
+
+        // Se a API falhar, tente o método de RSS como fallback
+        fetchYouTubeVideosViaRSS();
+      }
     } finally {
-      setLoading(false);
+      if (!isBackgroundUpdate) {
+        setLoading(false);
+      }
     }
   };
 
@@ -95,11 +276,14 @@ export default function YouTubeFeed({
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
         const videoId =
-          entry.getElementsByTagName("yt:videoId")[0]?.textContent;
-        const title = entry.getElementsByTagName("title")[0]?.textContent;
+          entry.getElementsByTagName("yt:videoId")[0]?.textContent || "";
+        const title =
+          entry.getElementsByTagName("title")[0]?.textContent ||
+          "Vídeo sem título";
         const content =
           entry.getElementsByTagName("media:description")[0]?.textContent ||
-          entry.getElementsByTagName("content")[0]?.textContent;
+          entry.getElementsByTagName("content")[0]?.textContent ||
+          "";
 
         formattedVideos.push({
           id: videoId,
@@ -109,7 +293,8 @@ export default function YouTubeFeed({
           imagem: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
           link: `https://www.youtube.com/watch?v=${videoId}`,
           date: new Date(
-            entry.getElementsByTagName("published")[0]?.textContent
+            entry.getElementsByTagName("published")[0]?.textContent ||
+              new Date()
           ),
         });
       }
@@ -122,19 +307,42 @@ export default function YouTubeFeed({
       setVideos(limitedVideos);
       setError(null);
 
-     
+      // Salva os vídeos do RSS no cache também
+      await saveVideosToCache(formattedVideos);
     } catch (rssError) {
       console.error("Erro ao buscar vídeos do YouTube via RSS:", rssError);
-      setError(
-        "Não foi possível carregar os vídeos do YouTube. Tente novamente mais tarde."
-      );
+
+      // Tentar usar dados offline armazenados no projeto
+      try {
+        console.log("Tentando carregar dados offline do YouTube");
+        const offlineData = require("../../assets/data/youtube/videos.json");
+        if (Array.isArray(offlineData) && offlineData.length > 0) {
+          console.log(
+            "Dados offline carregados com sucesso:",
+            offlineData.length,
+            "vídeos"
+          );
+          setVideos(limit ? offlineData.slice(0, limit) : offlineData);
+          setError(
+            "Usando dados offline. Não foi possível conectar ao YouTube."
+          );
+        } else {
+          throw new Error("Dados offline inválidos");
+        }
+      } catch (offlineError) {
+        console.error("Erro ao carregar dados offline:", offlineError);
+        setError(
+          "Não foi possível carregar os vídeos do YouTube. Verifique sua conexão."
+        );
+        setVideos([]);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const navigateToYouTubePage = () => {
-    router.push("/(tabs)/YouTube");
+    router.push("/midia/youtube");
   };
 
   if (loading) {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "fogao-do-meu-coracao",
     "slug": "fogao-do-meu-coracao",
-    "version": "1.0.0",
+    "version": "3.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon-square.png",
     "scheme": "fogaodomeucoracao",
@@ -21,7 +21,13 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.mxsgamejps.fogaodomeucoracao",
-      "versionCode": 1
+      "versionCode": 8,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -39,7 +45,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

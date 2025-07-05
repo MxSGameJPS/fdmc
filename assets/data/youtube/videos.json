@@ -1,0 +1,26 @@
+[
+  {
+    "id": "placeholder1",
+    "title": "Conteúdo offline: Botafogo Notícias",
+    "content": "Dados offline para exibição quando a API do YouTube não estiver disponível.",
+    "imagem": "https://via.placeholder.com/480x360?text=Dados+Offline",
+    "link": "https://www.youtube.com/channel/UCGYyVRxyMn-7YuConcWEqYQ",
+    "date": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "placeholder2",
+    "title": "Conteúdo offline: Botafogo Destaques",
+    "content": "Dados offline para exibição quando a API do YouTube não estiver disponível.",
+    "imagem": "https://via.placeholder.com/480x360?text=Dados+Offline",
+    "link": "https://www.youtube.com/channel/UCGYyVRxyMn-7YuConcWEqYQ",
+    "date": "2023-01-02T00:00:00Z"
+  },
+  {
+    "id": "placeholder3",
+    "title": "Conteúdo offline: Fogão do Meu Coração",
+    "content": "Dados offline para exibição quando a API do YouTube não estiver disponível.",
+    "imagem": "https://via.placeholder.com/480x360?text=Dados+Offline",
+    "link": "https://www.youtube.com/channel/UCGYyVRxyMn-7YuConcWEqYQ",
+    "date": "2023-01-03T00:00:00Z"
+  }
+]

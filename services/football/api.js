@@ -145,7 +145,8 @@ const BOTAFOGO_ID = 120;
 
 // IDs das competições
 const COMPETITIONS = {
-  BRASILEIRAO: 71,
+  BRASILEIRAO: 71, // ID do Brasileirão na API
+  BRASILEIRAO_2025: 83, // ID atualizado para o Brasileirão 2025
   COPA_DO_BRASIL: 72,
   LIBERTADORES: 13,
   MUNDIAL_CLUBES: 15,
@@ -553,3 +554,162 @@ export async function getTeamDetails() {
     throw error;
   }
 }
+
+// Função para obter os próximos jogos do Brasileirão
+export const getNextBrasileiraoMatches = async (limit = 5) => {
+  try {
+    const cacheKey = `football_brasileirao_next_matches_${limit}_2025`;
+
+    // Verificar se há dados em cache
+    const cachedData = await getFromCache(cacheKey);
+    if (cachedData) return cachedData;
+
+    // Usar o ano correto para o Brasileirão 2025
+    const season = 2025;
+
+    // Se não houver dados em cache, vamos criar alguns dados de exemplo
+    // até que a API tenha dados reais para o Brasileirão 2025
+
+    // DADOS FICTÍCIOS para testes enquanto a API não tem dados de 2025
+    const mockMatches = [
+      {
+        id: 1001,
+        date: "2025-07-06T16:00:00-03:00",
+        timestamp: 1720116000,
+        homeTeam: {
+          id: 127,
+          name: "Botafogo",
+          logo: "https://media.api-sports.io/football/teams/127.png",
+        },
+        awayTeam: {
+          id: 130,
+          name: "Flamengo",
+          logo: "https://media.api-sports.io/football/teams/130.png",
+        },
+        venue: "Estádio Nilton Santos",
+        status: { short: "NS" },
+        round: "Rodada 15",
+      },
+      {
+        id: 1002,
+        date: "2025-07-13T16:00:00-03:00",
+        timestamp: 1720720800,
+        homeTeam: {
+          id: 126,
+          name: "São Paulo",
+          logo: "https://media.api-sports.io/football/teams/126.png",
+        },
+        awayTeam: {
+          id: 127,
+          name: "Botafogo",
+          logo: "https://media.api-sports.io/football/teams/127.png",
+        },
+        venue: "Morumbis",
+        status: { short: "NS" },
+        round: "Rodada 16",
+      },
+      {
+        id: 1003,
+        date: "2025-07-20T18:30:00-03:00",
+        timestamp: 1721335800,
+        homeTeam: {
+          id: 127,
+          name: "Botafogo",
+          logo: "https://media.api-sports.io/football/teams/127.png",
+        },
+        awayTeam: {
+          id: 131,
+          name: "Corinthians",
+          logo: "https://media.api-sports.io/football/teams/131.png",
+        },
+        venue: "Estádio Nilton Santos",
+        status: { short: "NS" },
+        round: "Rodada 17",
+      },
+      {
+        id: 1004,
+        date: "2025-07-27T16:00:00-03:00",
+        timestamp: 1721930400,
+        homeTeam: {
+          id: 118,
+          name: "Palmeiras",
+          logo: "https://media.api-sports.io/football/teams/118.png",
+        },
+        awayTeam: {
+          id: 127,
+          name: "Botafogo",
+          logo: "https://media.api-sports.io/football/teams/127.png",
+        },
+        venue: "Allianz Parque",
+        status: { short: "NS" },
+        round: "Rodada 18",
+      },
+      {
+        id: 1005,
+        date: "2025-08-03T18:30:00-03:00",
+        timestamp: 1722545400,
+        homeTeam: {
+          id: 127,
+          name: "Botafogo",
+          logo: "https://media.api-sports.io/football/teams/127.png",
+        },
+        awayTeam: {
+          id: 154,
+          name: "Fluminense",
+          logo: "https://media.api-sports.io/football/teams/154.png",
+        },
+        venue: "Estádio Nilton Santos",
+        status: { short: "NS" },
+        round: "Rodada 19",
+      },
+    ];
+
+    // Salvar em cache
+    await saveToCache(cacheKey, mockMatches);
+    return mockMatches;
+
+    /* Código original que tentaria buscar da API - comentado temporariamente
+    const response = await apiClient.get("/fixtures", {
+      params: {
+        league: COMPETITIONS.BRASILEIRAO_2025,
+        season: season,
+        next: limit,
+        timezone: "America/Sao_Paulo",
+      },
+    });
+    */
+
+    /* Código comentado temporariamente
+    if (response.data && response.data.response) {
+      // Processar e formatar dados
+      const matches = response.data.response.map((match) => ({
+        id: match.fixture.id,
+        date: match.fixture.date,
+        timestamp: match.fixture.timestamp,
+        homeTeam: {
+          id: match.teams.home.id,
+          name: match.teams.home.name,
+          logo: match.teams.home.logo,
+        },
+        awayTeam: {
+          id: match.teams.away.id,
+          name: match.teams.away.name,
+          logo: match.teams.away.logo,
+        },
+        venue: match.fixture.venue?.name || "Local não definido",
+        status: match.fixture.status,
+        round: match.league.round,
+      }));
+
+      // Salvar em cache
+      await saveToCache(cacheKey, matches);
+      return matches;
+    }
+
+    throw new Error("Não foi possível obter jogos do Brasileirão");
+    */
+  } catch (error) {
+    console.error("Erro ao obter próximos jogos do Brasileirão:", error);
+    return [];
+  }
+};
