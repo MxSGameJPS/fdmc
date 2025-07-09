@@ -18,7 +18,11 @@ import {
   testApiConnection,
 } from "../services/football/api";
 import { diagnosticNotificationsSystem } from "../services/notifications/diagnostic";
-import { getErrorLogs, clearErrorLogs, testFirebaseInit } from "../services/firebase-diagnostic";
+import {
+  getErrorLogs,
+  clearErrorLogs,
+  testFirebaseInit,
+} from "../services/firebase-diagnostic";
 import { app, auth, database } from "../services/firebase";
 
 export default function DiagnosticScreen() {
@@ -46,13 +50,16 @@ export default function DiagnosticScreen() {
       // Teste de inicialização do Firebase
       const results = await testFirebaseInit(app, auth, database);
       setFirebaseDiagnostic(results);
-      
+
       // Carregar logs de erro
       const logs = await getErrorLogs();
       setFirebaseLogs(logs);
     } catch (error) {
-      console.error('Erro ao carregar diagnóstico do Firebase:', error);
-      Alert.alert('Erro', 'Não foi possível carregar o diagnóstico do Firebase.');
+      console.error("Erro ao carregar diagnóstico do Firebase:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível carregar o diagnóstico do Firebase."
+      );
     } finally {
       setFirebaseLoading(false);
     }
@@ -62,11 +69,11 @@ export default function DiagnosticScreen() {
   const clearFirebaseLogs = async () => {
     try {
       await clearErrorLogs();
-      Alert.alert('Sucesso', 'Logs do Firebase limpos com sucesso!');
+      Alert.alert("Sucesso", "Logs do Firebase limpos com sucesso!");
       setFirebaseLogs([]);
     } catch (error) {
-      console.error('Erro ao limpar logs do Firebase:', error);
-      Alert.alert('Erro', 'Não foi possível limpar os logs.');
+      console.error("Erro ao limpar logs do Firebase:", error);
+      Alert.alert("Erro", "Não foi possível limpar os logs.");
     }
   };
 
@@ -74,17 +81,20 @@ export default function DiagnosticScreen() {
   const tryRecoverFirebase = async () => {
     try {
       // Tentar recarregar os módulos do Firebase
-      const authModule = require('firebase/auth');
-      const dbModule = require('firebase/database');
-      
+      const authModule = require("firebase/auth");
+      const dbModule = require("firebase/database");
+
       Alert.alert(
-        'Recarregamento',
-        'Tentativa de recarregar módulos do Firebase iniciada. Por favor, reinicie o aplicativo.',
-        [{ text: 'OK' }]
+        "Recarregamento",
+        "Tentativa de recarregar módulos do Firebase iniciada. Por favor, reinicie o aplicativo.",
+        [{ text: "OK" }]
       );
     } catch (error) {
-      console.error('Erro ao recarregar Firebase:', error);
-      Alert.alert('Erro', 'Não foi possível recarregar os módulos do Firebase.');
+      console.error("Erro ao recarregar Firebase:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível recarregar os módulos do Firebase."
+      );
     }
   };
 
@@ -316,7 +326,9 @@ export default function DiagnosticScreen() {
 
               {notificationStatus.backgroundFetchStatus && (
                 <View style={styles.detailsRow}>
-                  <Text style={styles.detailsLabel}>Status do Background Fetch:</Text>
+                  <Text style={styles.detailsLabel}>
+                    Status do Background Fetch:
+                  </Text>
                   <Text style={styles.detailsValue}>
                     {notificationStatus.backgroundFetchStatus.isRegistered
                       ? "Registrado"
@@ -335,11 +347,12 @@ export default function DiagnosticScreen() {
             </View>
           ) : (
             <Text style={styles.infoText}>
-              Execute o diagnóstico para verificar o status do sistema de notificações
+              Execute o diagnóstico para verificar o status do sistema de
+              notificações
             </Text>
           )}
         </View>
-        
+
         {/* Seção de Diagnóstico do Firebase */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -363,47 +376,85 @@ export default function DiagnosticScreen() {
                 style={[
                   styles.statusText,
                   {
-                    color: firebaseDiagnostic.authInitialized ? "#4CAF50" : "#F44336",
+                    color: firebaseDiagnostic.authInitialized
+                      ? "#4CAF50"
+                      : "#F44336",
                   },
                 ]}
               >
-                {firebaseDiagnostic.authInitialized ? "✓ Operacional" : "✗ Com problemas"}
+                {firebaseDiagnostic.authInitialized
+                  ? "✓ Operacional"
+                  : "✗ Com problemas"}
               </Text>
 
               <View style={styles.detailsRow}>
                 <Text style={styles.detailsLabel}>App Inicializado:</Text>
-                <Text style={[styles.detailsValue, 
-                  {color: firebaseDiagnostic.appInitialized ? "#4CAF50" : "#F44336"}]}>
+                <Text
+                  style={[
+                    styles.detailsValue,
+                    {
+                      color: firebaseDiagnostic.appInitialized
+                        ? "#4CAF50"
+                        : "#F44336",
+                    },
+                  ]}
+                >
                   {firebaseDiagnostic.appInitialized ? "Sim" : "Não"}
                 </Text>
               </View>
 
               <View style={styles.detailsRow}>
                 <Text style={styles.detailsLabel}>Auth Inicializado:</Text>
-                <Text style={[styles.detailsValue, 
-                  {color: firebaseDiagnostic.authInitialized ? "#4CAF50" : "#F44336"}]}>
+                <Text
+                  style={[
+                    styles.detailsValue,
+                    {
+                      color: firebaseDiagnostic.authInitialized
+                        ? "#4CAF50"
+                        : "#F44336",
+                    },
+                  ]}
+                >
                   {firebaseDiagnostic.authInitialized ? "Sim" : "Não"}
                 </Text>
               </View>
 
               <View style={styles.detailsRow}>
                 <Text style={styles.detailsLabel}>Database Inicializado:</Text>
-                <Text style={[styles.detailsValue, 
-                  {color: firebaseDiagnostic.databaseInitialized ? "#4CAF50" : "#F44336"}]}>
+                <Text
+                  style={[
+                    styles.detailsValue,
+                    {
+                      color: firebaseDiagnostic.databaseInitialized
+                        ? "#4CAF50"
+                        : "#F44336",
+                    },
+                  ]}
+                >
                   {firebaseDiagnostic.databaseInitialized ? "Sim" : "Não"}
                 </Text>
               </View>
 
               <View style={styles.detailsRow}>
-                <Text style={styles.detailsLabel}>AsyncStorage Funcionando:</Text>
-                <Text style={[styles.detailsValue, 
-                  {color: firebaseDiagnostic.asyncStorageWorking ? "#4CAF50" : "#F44336"}]}>
+                <Text style={styles.detailsLabel}>
+                  AsyncStorage Funcionando:
+                </Text>
+                <Text
+                  style={[
+                    styles.detailsValue,
+                    {
+                      color: firebaseDiagnostic.asyncStorageWorking
+                        ? "#4CAF50"
+                        : "#F44336",
+                    },
+                  ]}
+                >
                   {firebaseDiagnostic.asyncStorageWorking ? "Sim" : "Não"}
                 </Text>
               </View>
 
               <TouchableOpacity
-                style={[styles.button, {marginTop: 10}]}
+                style={[styles.button, { marginTop: 10 }]}
                 onPress={tryRecoverFirebase}
               >
                 <Text style={styles.buttonText}>Tentar Recuperar Firebase</Text>
@@ -417,39 +468,50 @@ export default function DiagnosticScreen() {
 
           {/* Logs do Firebase */}
           {firebaseLogs && firebaseLogs.length > 0 && (
-            <View style={[styles.resultCard, {marginTop: 10}]}>
-              <Text style={styles.sectionTitle}>Logs de Erro ({firebaseLogs.length})</Text>
-              
+            <View style={[styles.resultCard, { marginTop: 10 }]}>
+              <Text style={styles.sectionTitle}>
+                Logs de Erro ({firebaseLogs.length})
+              </Text>
+
               {firebaseLogs.slice(0, 3).map((log, index) => (
                 <View key={index} style={styles.errorDetails}>
-                  <Text style={{color: "#D1AC00"}}>
+                  <Text style={{ color: "#D1AC00" }}>
                     {new Date(log.timestamp).toLocaleString()}
                   </Text>
-                  <Text style={{color: "#FFFFFF"}}>
+                  <Text style={{ color: "#FFFFFF" }}>
                     Componente: {log.component}
                   </Text>
-                  <Text style={styles.errorText}>
-                    {log.errorMessage}
-                  </Text>
+                  <Text style={styles.errorText}>{log.errorMessage}</Text>
                   {log.errorCode && (
-                    <Text style={{color: "#FF9999"}}>
+                    <Text style={{ color: "#FF9999" }}>
                       Código: {log.errorCode}
                     </Text>
                   )}
                 </View>
               ))}
-              
+
               {firebaseLogs.length > 3 && (
-                <Text style={{color: "#AAAAAA", marginTop: 5, textAlign: "center"}}>
+                <Text
+                  style={{
+                    color: "#AAAAAA",
+                    marginTop: 5,
+                    textAlign: "center",
+                  }}
+                >
                   + {firebaseLogs.length - 3} logs adicionais
                 </Text>
               )}
-              
+
               <TouchableOpacity
-                style={[styles.button, {marginTop: 10, backgroundColor: "#444"}]}
+                style={[
+                  styles.button,
+                  { marginTop: 10, backgroundColor: "#444" },
+                ]}
                 onPress={clearFirebaseLogs}
               >
-                <Text style={[styles.buttonText, {color: "#FFFFFF"}]}>Limpar Logs</Text>
+                <Text style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                  Limpar Logs
+                </Text>
               </TouchableOpacity>
             </View>
           )}

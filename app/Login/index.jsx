@@ -17,7 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from "expo-file-system";
 
 // Importar diretamente do arquivo firebase
 import { auth } from "../../services/firebase";
@@ -31,7 +31,7 @@ try {
   onAuthStateChanged = authModule.onAuthStateChanged;
 } catch (error) {
   console.error("Erro ao importar funções de autenticação:", error);
-  saveErrorLog('login-import', error);
+  saveErrorLog("login-import", error);
 }
 
 export default function Login() {
@@ -42,7 +42,7 @@ export default function Login() {
   const [authReady, setAuthReady] = useState(false);
   const [manterConectado, setManterConectado] = useState(true);
   const [firebaseError, setFirebaseError] = useState(false);
-  
+
   // Verificar se Auth está pronto e se o usuário está logado
   useEffect(() => {
     const checkAuth = () => {
@@ -50,49 +50,59 @@ export default function Login() {
         if (!auth) {
           console.log("Auth não está disponível na tela de login");
           setFirebaseError(true);
-          saveErrorLog('login-check-auth', new Error('Auth não está disponível'));
+          saveErrorLog(
+            "login-check-auth",
+            new Error("Auth não está disponível")
+          );
           setTimeout(checkAuth, 1000);
           return;
         }
-        
+
         if (!onAuthStateChanged) {
           console.log("onAuthStateChanged não está disponível");
           setFirebaseError(true);
-          saveErrorLog('login-onAuthStateChanged', new Error('onAuthStateChanged não está disponível'));
+          saveErrorLog(
+            "login-onAuthStateChanged",
+            new Error("onAuthStateChanged não está disponível")
+          );
           setTimeout(checkAuth, 1000);
           return;
         }
-        
+
         console.log("Auth está disponível na tela de login");
         setAuthReady(true);
         setFirebaseError(false);
 
         // Verificar se o usuário já está logado
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-          try {
-            if (user) {
-              // Verificar se a opção "manter conectado" está ativada
-              const manterConectadoSalvo = await AsyncStorage.getItem(
-                "manterConectado"
-              );
-
-              if (manterConectadoSalvo === "true") {
-                console.log(
-                  "Usuário já está logado e optou por manter-se conectado"
+        const unsubscribe = onAuthStateChanged(
+          auth,
+          async (user) => {
+            try {
+              if (user) {
+                // Verificar se a opção "manter conectado" está ativada
+                const manterConectadoSalvo = await AsyncStorage.getItem(
+                  "manterConectado"
                 );
-                router.replace("/(tabs)/Home");
+
+                if (manterConectadoSalvo === "true") {
+                  console.log(
+                    "Usuário já está logado e optou por manter-se conectado"
+                  );
+                  router.replace("/(tabs)/Home");
+                }
+              } else {
+                console.log("Nenhum usuário autenticado");
               }
-            } else {
-              console.log("Nenhum usuário autenticado");
+            } catch (error) {
+              console.error("Erro ao verificar estado de login:", error);
+              saveErrorLog("login-authstate-check", error);
             }
-          } catch (error) {
-            console.error("Erro ao verificar estado de login:", error);
-            saveErrorLog('login-authstate-check', error);
+          },
+          (error) => {
+            console.error("Erro em onAuthStateChanged:", error);
+            saveErrorLog("login-onAuthStateChanged-error", error);
           }
-        }, (error) => {
-          console.error("Erro em onAuthStateChanged:", error);
-          saveErrorLog('login-onAuthStateChanged-error', error);
-        });
+        );
 
         return () => {
           try {
@@ -103,7 +113,7 @@ export default function Login() {
         };
       } catch (error) {
         console.error("Erro no checkAuth:", error);
-        saveErrorLog('login-checkAuth', error);
+        saveErrorLog("login-checkAuth", error);
         setFirebaseError(true);
         setTimeout(checkAuth, 1000);
       }
@@ -115,7 +125,10 @@ export default function Login() {
   const realizarLogin = async () => {
     // Verificar se o Firebase está pronto
     if (!auth || !signInWithEmailAndPassword) {
-      saveErrorLog('login-attempt', new Error('Serviços de autenticação não disponíveis'));
+      saveErrorLog(
+        "login-attempt",
+        new Error("Serviços de autenticação não disponíveis")
+      );
       Alert.alert(
         "Erro",
         "O sistema de autenticação não está pronto. Por favor, tente novamente mais tarde ou reinicie o aplicativo."
@@ -137,7 +150,7 @@ export default function Login() {
     setLoading(true);
     try {
       console.log("Tentando fazer login com:", email);
-      
+
       // Tentar fazer login com Firebase
       await signInWithEmailAndPassword(auth, email, senha);
       console.log("Login bem-sucedido");
@@ -153,7 +166,7 @@ export default function Login() {
         }
       } catch (storageError) {
         console.error("Erro ao salvar preferência:", storageError);
-        saveErrorLog('login-save-preference', storageError);
+        saveErrorLog("login-save-preference", storageError);
         // Não interromper o fluxo de login por erro de preferência
       }
 
@@ -161,7 +174,7 @@ export default function Login() {
       router.replace("/(tabs)/Home");
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      saveErrorLog('login-attempt-failed', error, { email });
+      saveErrorLog("login-attempt-failed", error, { email });
 
       let mensagemErro = "Ocorreu um erro ao fazer login.";
       if (error.code === "auth/invalid-email") {
@@ -199,30 +212,39 @@ export default function Login() {
     try {
       const logs = await getErrorLogs();
       console.log("Logs de erro:", logs);
-      
+
       Alert.alert(
         "Diagnóstico",
-        `Verificando problemas de autenticação. ${!auth ? 'Auth não está disponível.' : 'Auth está disponível.'} ${!signInWithEmailAndPassword ? 'Função de login não está disponível.' : 'Função de login está disponível.'}`
+        `Verificando problemas de autenticação. ${
+          !auth ? "Auth não está disponível." : "Auth está disponível."
+        } ${
+          !signInWithEmailAndPassword
+            ? "Função de login não está disponível."
+            : "Função de login está disponível."
+        }`
       );
-      
+
       // Tentar reinicializar os módulos Firebase
       try {
         const authModule = require("firebase/auth");
         signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
         onAuthStateChanged = authModule.onAuthStateChanged;
-        
+
         if (signInWithEmailAndPassword && onAuthStateChanged) {
           setAuthReady(true);
           setFirebaseError(false);
-          Alert.alert("Sucesso", "Módulos de autenticação recarregados com sucesso!");
+          Alert.alert(
+            "Sucesso",
+            "Módulos de autenticação recarregados com sucesso!"
+          );
         }
       } catch (error) {
         console.error("Erro ao recarregar módulos:", error);
-        saveErrorLog('login-reload-modules', error);
+        saveErrorLog("login-reload-modules", error);
       }
     } catch (error) {
       console.error("Erro no diagnóstico:", error);
-      saveErrorLog('login-diagnostic', error);
+      saveErrorLog("login-diagnostic", error);
     }
   };
 
@@ -333,17 +355,23 @@ export default function Login() {
               style={styles.diagnosticLink}
               onPress={() => router.push("/diagnostic")}
             >
-              <Text style={styles.diagnosticLinkText}>Diagnóstico do Sistema</Text>
+              <Text style={styles.diagnosticLinkText}>
+                Diagnóstico do Sistema
+              </Text>
             </TouchableOpacity>
 
             {!authReady && (
               <View>
-                <Text style={styles.loadingText}>Inicializando serviços...</Text>
+                <Text style={styles.loadingText}>
+                  Inicializando serviços...
+                </Text>
                 <TouchableOpacity
                   style={styles.diagnosticButton}
                   onPress={diagnosticarProblema}
                 >
-                  <Text style={styles.diagnosticButtonText}>Diagnosticar Problema</Text>
+                  <Text style={styles.diagnosticButtonText}>
+                    Diagnosticar Problema
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -476,7 +504,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     alignItems: "center",
     marginTop: 10,
-    alignSelf: "center"
+    alignSelf: "center",
   },
   diagnosticButtonText: {
     color: "#D1AC00",
@@ -491,5 +519,5 @@ const styles = StyleSheet.create({
     color: "#888888",
     fontSize: 14,
     textDecorationLine: "underline",
-  }
+  },
 });

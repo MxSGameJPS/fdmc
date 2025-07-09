@@ -1,4 +1,40 @@
+Fogão do Meu Coração - Versão 3.0.2 (4/07/2025)
+
+🛠️ Correção crítica de navegação e conflito de rotas
+
+Mudanças nesta versão:
+
+✅ Corrigido erro crítico que causava o fechamento do app na tela de Competições
+✅ Resolvido conflito de rotas entre tabs e páginas de competições
+✅ Melhorada a experiência de navegação entre diferentes áreas do app
+✅ Interface da aba Competições redesenhada para melhor usabilidade
+✅ Eliminados redirecionamentos desnecessários que causavam problemas
+
+Esta atualização resolve o problema de navegação reportado por usuários que experimentavam fechamentos inesperados do aplicativo ao tentar acessar determinadas telas. A experiência de uso agora será mais fluida e estável.
+
+#FogãoDoMeuCoração ⭐ #CorreçãoDeNavegação #Estabilidade
+
+---
+
 Fogão do Meu Coração - Versão 3.0.1 (4/07/2025)
+
+🔒 Correção urgente para o sistema de autenticação
+
+Mudanças nesta versão:
+
+✅ Corrigido problema crítico que causava o fechamento do app nas telas de login/cadastro
+✅ Implementado sistema de diagnóstico de problemas de autenticação
+✅ Adicionadas verificações de integridade para os serviços Firebase
+✅ Melhorado o tratamento de erros durante o login e cadastro
+✅ Adicionadas permissões necessárias para o funcionamento completo do app
+✅ Logs detalhados para diagnóstico e resolução de problemas
+✅ Opção para diagnóstico e recuperação manual em caso de falha
+
+Esta atualização resolve problemas críticos reportados por usuários após a atualização para a versão 3.0.0.
+
+#FogãoDoMeuCoração ⭐ #CorrecaoUrgente #Autenticacao
+
+---o - Versão 3.0.1 (4/07/2025)
 
 � Correção urgente para o sistema de autenticação
 

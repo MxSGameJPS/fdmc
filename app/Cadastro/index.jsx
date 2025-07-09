@@ -26,13 +26,13 @@ let createUserWithEmailAndPassword, ref, set;
 try {
   const authModule = require("firebase/auth");
   createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
-  
+
   const dbModule = require("firebase/database");
   ref = dbModule.ref;
   set = dbModule.set;
 } catch (error) {
   console.error("Erro ao importar funções Firebase:", error);
-  saveErrorLog('cadastro-import', error);
+  saveErrorLog("cadastro-import", error);
 }
 
 export default function Cadastro() {
@@ -58,25 +58,31 @@ export default function Cadastro() {
         if (!auth || !createUserWithEmailAndPassword) {
           console.log("Auth ou função de cadastro não disponível");
           setFirebaseError(true);
-          saveErrorLog('cadastro-check-auth', new Error('Auth ou função de cadastro não disponível'));
+          saveErrorLog(
+            "cadastro-check-auth",
+            new Error("Auth ou função de cadastro não disponível")
+          );
           setTimeout(checkAuth, 1000);
           return;
         }
-        
+
         if (!database || !ref || !set) {
           console.log("Database ou funções de banco não disponíveis");
           setFirebaseError(true);
-          saveErrorLog('cadastro-check-db', new Error('Database ou funções de banco não disponíveis'));
+          saveErrorLog(
+            "cadastro-check-db",
+            new Error("Database ou funções de banco não disponíveis")
+          );
           setTimeout(checkAuth, 1000);
           return;
         }
-        
+
         console.log("Auth e Database estão disponíveis na tela de cadastro");
         setAuthReady(true);
         setFirebaseError(false);
       } catch (error) {
         console.error("Erro no checkAuth do cadastro:", error);
-        saveErrorLog('cadastro-checkAuth', error);
+        saveErrorLog("cadastro-checkAuth", error);
         setFirebaseError(true);
         setTimeout(checkAuth, 1000);
       }
@@ -156,33 +162,47 @@ export default function Cadastro() {
     try {
       const logs = await getErrorLogs();
       console.log("Logs de erro:", logs);
-      
+
       Alert.alert(
         "Diagnóstico",
-        `Verificando problemas de cadastro. ${!auth ? 'Auth não está disponível.' : 'Auth está disponível.'} ${!createUserWithEmailAndPassword ? 'Função de cadastro não está disponível.' : 'Função de cadastro está disponível.'} ${!database ? 'Database não está disponível.' : 'Database está disponível.'}`
+        `Verificando problemas de cadastro. ${
+          !auth ? "Auth não está disponível." : "Auth está disponível."
+        } ${
+          !createUserWithEmailAndPassword
+            ? "Função de cadastro não está disponível."
+            : "Função de cadastro está disponível."
+        } ${
+          !database
+            ? "Database não está disponível."
+            : "Database está disponível."
+        }`
       );
-      
+
       // Tentar reinicializar os módulos Firebase
       try {
         const authModule = require("firebase/auth");
-        createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
-        
+        createUserWithEmailAndPassword =
+          authModule.createUserWithEmailAndPassword;
+
         const dbModule = require("firebase/database");
         ref = dbModule.ref;
         set = dbModule.set;
-        
+
         if (createUserWithEmailAndPassword && ref && set) {
           setAuthReady(true);
           setFirebaseError(false);
-          Alert.alert("Sucesso", "Módulos de Firebase recarregados com sucesso!");
+          Alert.alert(
+            "Sucesso",
+            "Módulos de Firebase recarregados com sucesso!"
+          );
         }
       } catch (error) {
         console.error("Erro ao recarregar módulos:", error);
-        saveErrorLog('cadastro-reload-modules', error);
+        saveErrorLog("cadastro-reload-modules", error);
       }
     } catch (error) {
       console.error("Erro no diagnóstico:", error);
-      saveErrorLog('cadastro-diagnostic', error);
+      saveErrorLog("cadastro-diagnostic", error);
     }
   };
 
@@ -192,7 +212,10 @@ export default function Cadastro() {
 
     // Verificar se auth e database estão disponíveis
     if (!auth || !createUserWithEmailAndPassword) {
-      saveErrorLog('cadastro-attempt', new Error('Serviços de autenticação não disponíveis'));
+      saveErrorLog(
+        "cadastro-attempt",
+        new Error("Serviços de autenticação não disponíveis")
+      );
       Alert.alert(
         "Erro",
         "O sistema de autenticação não está pronto. Por favor, tente novamente mais tarde ou reinicie o aplicativo."
@@ -201,7 +224,10 @@ export default function Cadastro() {
     }
 
     if (!database || !ref || !set) {
-      saveErrorLog('cadastro-attempt', new Error('Serviços de banco de dados não disponíveis'));
+      saveErrorLog(
+        "cadastro-attempt",
+        new Error("Serviços de banco de dados não disponíveis")
+      );
       Alert.alert(
         "Erro",
         "O banco de dados não está pronto. Por favor, tente novamente mais tarde ou reinicie o aplicativo."
@@ -239,8 +265,8 @@ export default function Cadastro() {
       );
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
-      saveErrorLog('cadastro-attempt-failed', error, { email });
-      
+      saveErrorLog("cadastro-attempt-failed", error, { email });
+
       let mensagemErro = "Ocorreu um erro ao realizar o cadastro.";
 
       if (error.code === "auth/email-already-in-use") {
@@ -461,7 +487,9 @@ export default function Cadastro() {
                     style={styles.diagnosticButton}
                     onPress={diagnosticarProblema}
                   >
-                    <Text style={styles.diagnosticButtonText}>Diagnosticar Problema</Text>
+                    <Text style={styles.diagnosticButtonText}>
+                      Diagnosticar Problema
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -482,7 +510,9 @@ export default function Cadastro() {
               style={styles.diagnosticLink}
               onPress={() => router.push("/diagnostic")}
             >
-              <Text style={styles.diagnosticLinkText}>Diagnóstico do Sistema</Text>
+              <Text style={styles.diagnosticLinkText}>
+                Diagnóstico do Sistema
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -616,7 +646,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     alignItems: "center",
     marginBottom: 15,
-    alignSelf: "center"
+    alignSelf: "center",
   },
   diagnosticButtonText: {
     color: "#D1AC00",
@@ -632,5 +662,5 @@ const styles = StyleSheet.create({
     color: "#888888",
     fontSize: 14,
     textDecorationLine: "underline",
-  }
+  },
 });
