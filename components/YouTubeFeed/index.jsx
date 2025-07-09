@@ -384,15 +384,12 @@ export default function YouTubeFeed({
                     style={styles.simpleCard}
                     onPress={() => {
                       if (item.link) {
-                        // Abrir link do vídeo
-                        if (typeof window !== "undefined") {
-                          window.open(item.link, "_blank");
-                        } else {
-                          // React Native Linking
-                          try {
-                            const Linking = require("react-native").Linking;
-                            Linking.openURL(item.link);
-                          } catch {}
+                        // React Native Linking
+                        try {
+                          const Linking = require("react-native").Linking;
+                          Linking.openURL(item.link);
+                        } catch (e) {
+                          console.error("Erro ao abrir link:", e);
                         }
                       }
                     }}

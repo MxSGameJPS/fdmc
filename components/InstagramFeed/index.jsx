@@ -194,13 +194,11 @@ export default function InstagramFeed({
                     style={styles.simpleCard}
                     onPress={() => {
                       if (item.link) {
-                        if (typeof window !== "undefined") {
-                          window.open(item.link, "_blank");
-                        } else {
-                          try {
-                            const Linking = require("react-native").Linking;
-                            Linking.openURL(item.link);
-                          } catch {}
+                        try {
+                          const Linking = require("react-native").Linking;
+                          Linking.openURL(item.link);
+                        } catch (e) {
+                          console.error("Erro ao abrir link:", e);
                         }
                       }
                     }}

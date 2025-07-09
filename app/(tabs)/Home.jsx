@@ -8,8 +8,8 @@ import BrasileiraoWidget from "../../components/BrasileiraoWidget";
 
 export default function Home() {
   // Funções para navegar para as páginas completas
-  const navigateToYouTube = () => router.push("/(tabs)/Midia");
-  const navigateToInstagram = () => router.push("/(tabs)/Midia");
+  const navigateToYouTube = () => router.push("/midia/youtube");
+  const navigateToInstagram = () => router.push("/midia/instagram");
   const navigateToBlog = () => router.push("/(tabs)/Blog");
   const navigateToBrasileirao = () => router.push("/competicoes/brasileirao");
   const navigateToJogos = () => router.push("/(tabs)/Jogos");
