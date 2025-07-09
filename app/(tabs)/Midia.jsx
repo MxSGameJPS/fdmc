@@ -6,10 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Image,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Link, Stack, router } from "expo-router";
+import { Stack, router } from "expo-router";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 
 export default function Midia() {
@@ -24,7 +23,6 @@ export default function Midia() {
           headerShadowVisible: false,
         }}
       />
-
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Conteúdo do Fogão</Text>
         <Text style={styles.subtitle}>
@@ -33,6 +31,27 @@ export default function Midia() {
 
         {/* Cards para redes sociais */}
         <View style={styles.cardsContainer}>
+          {/* Mapa de Calor da Torcida */}
+          <TouchableOpacity
+            style={styles.socialCard}
+            onPress={() => router.push("/midia/mapa-calor")}
+          >
+            <View
+              style={[styles.cardIconContainer, { backgroundColor: "#388E3C" }]}
+            >
+              <Ionicons name="map" size={32} color="#FFFFFF" />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Mapa de Calor da Torcida</Text>
+              <Text style={styles.cardSubtitle}>
+                Veja a força da torcida no Brasil
+              </Text>
+            </View>
+            <View style={styles.cardArrow}>
+              <Ionicons name="chevron-forward" size={20} color="#D1AC00" />
+            </View>
+          </TouchableOpacity>
+
           {/* YouTube */}
           <TouchableOpacity
             style={styles.socialCard}

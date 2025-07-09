@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -16,6 +17,7 @@ export default function InstagramFeed({
   limit,
   showTitle = true,
   showViewMore = true,
+  horizontalCard = false,
 }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,8 +36,6 @@ export default function InstagramFeed({
       const response = await fetch(rssFeedUrl);
       const responseText = await response.text();
       const feed = await rssParser.parse(responseText);
-
-    
 
       const formattedPosts = feed.items.map((item) => {
         // Métodos avançados para extração de imagens
@@ -60,7 +60,6 @@ export default function InstagramFeed({
       setError(null);
 
       // Log para debug
-    
     } catch (error) {
       console.error("Erro ao buscar posts do Instagram:", error);
       setError(
@@ -81,7 +80,6 @@ export default function InstagramFeed({
         (e) => e.mimeType && e.mimeType.startsWith("image/")
       );
       if (imageEnclosure && imageEnclosure.url) {
-     
         return imageEnclosure.url;
       }
     }
@@ -92,7 +90,6 @@ export default function InstagramFeed({
         (m) => m.medium === "image" || (m.type && m.type.startsWith("image/"))
       );
       if (mediaWithImage && mediaWithImage.url) {
-    
         return mediaWithImage.url;
       }
     }
@@ -104,14 +101,12 @@ export default function InstagramFeed({
         /<img[^>]+src="([^"]+instagram[^"]+\.jpg)[^"]*"/
       );
       if (instagramMatch && instagramMatch[1]) {
- 
         return instagramMatch[1];
       }
 
       // Procurar por qualquer imagem no conteúdo
       const imgMatch = item.content.match(/<img[^>]+src="([^"]+)"/);
       if (imgMatch && imgMatch[1]) {
-    
         return imgMatch[1];
       }
     }
@@ -120,14 +115,12 @@ export default function InstagramFeed({
     if (item.description) {
       const imgMatch = item.description.match(/<img[^>]+src="([^"]+)"/);
       if (imgMatch && imgMatch[1]) {
-   
         return imgMatch[1];
       }
     }
 
     // 5. Verificar se há atributo imageUrl no item
     if (item.imageUrl) {
-  
       return item.imageUrl;
     }
 
@@ -138,12 +131,10 @@ export default function InstagramFeed({
         /<div class="rssapp-card-media"[^>]*>\s*<img[^>]+src="([^"]+)"/
       );
       if (rssAppMatch && rssAppMatch[1]) {
-       
         return rssAppMatch[1];
       }
     }
 
-   
     return null;
   };
 
@@ -197,15 +188,60 @@ export default function InstagramFeed({
             data={posts}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <Card
-                title={item.title}
-                content={item.content}
-                imagem={item.imagem}
-                link={item.link}
-              />
+              <View style={horizontalCard ? styles.horizontalCard : {}}>
+                {horizontalCard ? (
+                  <Pressable
+                    style={styles.simpleCard}
+                    onPress={() => {
+                      if (item.link) {
+                        if (typeof window !== "undefined") {
+                          window.open(item.link, "_blank");
+                        } else {
+                          try {
+                            const Linking = require("react-native").Linking;
+                            Linking.openURL(item.link);
+                          } catch {}
+                        }
+                      }
+                    }}
+                  >
+                    {item.imagem ? (
+                      <Image
+                        source={{ uri: item.imagem }}
+                        style={styles.simpleImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.noImageContainer}>
+                        <Ionicons name="image" size={36} color="#444" />
+                      </View>
+                    )}
+                    <View style={styles.simpleContent}>
+                      <Text style={styles.simpleTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ) : (
+                  <Card
+                    title={item.title}
+                    content={item.content}
+                    imagem={item.imagem}
+                    link={item.link}
+                  />
+                )}
+              </View>
             )}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={!limit}
+            horizontal={horizontalCard}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={
+              horizontalCard ? { paddingHorizontal: 12 } : {}
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Nenhum post disponível</Text>
+              </View>
+            }
           />
 
           {showViewMore && posts.length > 0 && (
@@ -234,7 +270,7 @@ export default function InstagramFeed({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    marginVertical: 10,
   },
   centered: {
     padding: 20,
@@ -287,5 +323,42 @@ const styles = StyleSheet.create({
   },
   viewMoreIcon: {
     marginTop: 2,
+  },
+  horizontalCard: {
+    width: 220,
+    marginHorizontal: 4,
+  },
+  simpleCard: {
+    width: 220,
+    backgroundColor: "#1c1c1c",
+    borderRadius: 8,
+    marginHorizontal: 4,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  simpleImage: {
+    width: "100%",
+    height: 120,
+  },
+  noImageContainer: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#2a2a2a",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  simpleContent: {
+    padding: 10,
+  },
+  simpleTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 6,
+    lineHeight: 18,
   },
 });

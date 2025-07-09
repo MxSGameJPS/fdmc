@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 function TabBarIcon(props) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
@@ -80,6 +81,15 @@ export default function TabLayout() {
           title: "Mais",
           tabBarIcon: ({ color }) => <TabBarIcon name="bars" color={color} />,
           headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="mapa"
+        options={{
+          title: "Mapa",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

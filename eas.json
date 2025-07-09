@@ -16,7 +16,7 @@
       },
       "autoIncrement": false,
       "env": {
-        "EXPO_USE_LOCAL_APP_VERSION": "3"
+        "EXPO_USE_LOCAL_APP_VERSION": "4"
       }
     }
   },

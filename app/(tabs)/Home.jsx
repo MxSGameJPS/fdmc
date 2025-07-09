@@ -11,7 +11,7 @@ export default function Home() {
   const navigateToYouTube = () => router.push("/(tabs)/Midia");
   const navigateToInstagram = () => router.push("/(tabs)/Midia");
   const navigateToBlog = () => router.push("/(tabs)/Blog");
-  const navigateToBrasileirao = () => router.push("/(tabs)/Competicoes");
+  const navigateToBrasileirao = () => router.push("/competicoes/brasileirao");
   const navigateToJogos = () => router.push("/(tabs)/Jogos");
 
   return (
@@ -41,7 +41,12 @@ export default function Home() {
             <Ionicons name="arrow-forward" size={16} color="#666" />
           </Pressable>
         </View>
-        <YouTubeFeed limit={3} showTitle={false} showViewMore={false} />
+        <YouTubeFeed
+          limit={3}
+          showTitle={false}
+          showViewMore={false}
+          horizontalCard
+        />
       </View>
 
       {/* Seção do Instagram - 3 posts mais recentes */}
@@ -56,42 +61,119 @@ export default function Home() {
             <Ionicons name="arrow-forward" size={16} color="#666" />
           </Pressable>
         </View>
-        <InstagramFeed limit={3} showTitle={false} showViewMore={false} />
+        <InstagramFeed
+          limit={3}
+          showTitle={false}
+          showViewMore={false}
+          horizontalCard
+        />
+      </View>
+
+      {/* Card do Mapa de Calor */}
+      <View
+        style={{
+          backgroundColor: "#222",
+          borderRadius: 12,
+          margin: 16,
+          marginBottom: 0,
+          overflow: "hidden",
+        }}
+      >
+        <Pressable
+          onPress={() => router.push("/midia/mapa-calor")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 16,
+          }}
+        >
+          <Ionicons
+            name="flame"
+            size={32}
+            color="#d1ac00"
+            style={{ marginRight: 16 }}
+          />
+          <View>
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: "bold",
+                fontSize: 18,
+                marginBottom: 4,
+              }}
+            >
+              Mapa de Calor da Torcida
+            </Text>
+            <Text
+              style={{
+                color: "#aaa",
+                fontSize: 15,
+                fontWeight: "500",
+                marginTop: 2,
+                maxWidth: 320,
+              }}
+            >
+              Descubra onde está a Nação Alvinegra espalhada pelo Brasil! Toque
+              para ver o mapa de calor exclusivo da torcida do Fogão.
+            </Text>
+          </View>
+        </Pressable>
       </View>
 
       {/* Seção do Brasileirão */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Brasileirão 2025</Text>
-          <Pressable
-            onPress={navigateToBrasileirao}
-            style={styles.viewMoreButton}
-          >
-            <Text style={styles.viewMoreText}>Ver classificação</Text>
-            <Ionicons name="arrow-forward" size={16} color="#666" />
-          </Pressable>
         </View>
-        <BrasileiraoWidget height={300} showHeader={false} showFooter={false} />
+        <Pressable
+          onPress={navigateToBrasileirao}
+          style={{
+            backgroundColor: "#D1AC00",
+            borderRadius: 8,
+            paddingVertical: 14,
+            paddingHorizontal: 24,
+            alignItems: "center",
+            marginHorizontal: 16,
+            marginBottom: 16,
+            marginTop: 8,
+            elevation: 2,
+          }}
+        >
+          <Text style={{ color: "#222", fontWeight: "bold", fontSize: 16 }}>
+            Confira a classificação do Brasileirão agora
+          </Text>
+        </Pressable>
       </View>
 
       {/* Seção Próximos Jogos */}
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Próximos Jogos</Text>
-          <Pressable onPress={navigateToJogos} style={styles.viewMoreButton}>
-            <Text style={styles.viewMoreText}>Ver calendário</Text>
-            <Ionicons name="arrow-forward" size={16} color="#666" />
-          </Pressable>
-        </View>
-        <View style={styles.jogosInfo}>
-          <Text style={styles.jogosText}>
-            Calendário atualizado com os próximos 9 jogos
-          </Text>
-          <Text style={styles.jogosText}>
-            Inclui partidas do Brasileirão, Copa do Brasil e Libertadores
-          </Text>
-          <Text style={styles.jogosUpdate}>Atualizado em: 10/07/2025</Text>
-        </View>
+        <Pressable
+          onPress={navigateToJogos}
+          style={{
+            borderRadius: 12,
+            overflow: "hidden",
+            backgroundColor: "#222",
+            marginHorizontal: 8,
+            marginBottom: 8,
+          }}
+        >
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Próximos Jogos</Text>
+            {/* <View style={styles.viewMoreButton}>
+              <Text style={styles.viewMoreText}>Ver calendário</Text>
+              <Ionicons name="arrow-forward" size={16} color="#666" />
+            </View> */}
+          </View>
+          <View style={styles.jogosInfo}>
+            <Text style={styles.jogosText}>
+              Calendário atualizado com os próximos 9 jogos
+            </Text>
+            <Text style={styles.jogosText}>
+              Inclui partidas do Brasileirão, Copa do Brasil e Libertadores
+            </Text>
+            <Text style={styles.jogosUpdate}>Atualizado em: 10/07/2025</Text>
+          </View>
+        </Pressable>
       </View>
 
       {/* Espaço no final da página */}
@@ -125,15 +207,19 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 8,
+    justifyContent: "center",
   },
   sectionTitle: {
     fontSize: 20,
+    padding: 8,
     fontWeight: "bold",
     color: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
   },
   viewMoreButton: {
     flexDirection: "row",

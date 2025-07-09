@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Card from "../card";
@@ -16,6 +17,7 @@ export default function YouTubeFeed({
   limit,
   showTitle = true,
   showViewMore = true,
+  horizontalCard = false,
 }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -375,15 +377,59 @@ export default function YouTubeFeed({
             data={videos}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <Card
-                title={item.title}
-                content={item.content}
-                imagem={item.imagem}
-                link={item.link} // Adicione esta linha
-              />
+              <View style={horizontalCard ? styles.horizontalCard : {}}>
+                {/* Card simplificado para carrossel horizontal: só imagem e título */}
+                {horizontalCard ? (
+                  <Pressable
+                    style={styles.simpleCard}
+                    onPress={() => {
+                      if (item.link) {
+                        // Abrir link do vídeo
+                        if (typeof window !== "undefined") {
+                          window.open(item.link, "_blank");
+                        } else {
+                          // React Native Linking
+                          try {
+                            const Linking = require("react-native").Linking;
+                            Linking.openURL(item.link);
+                          } catch {}
+                        }
+                      }
+                    }}
+                  >
+                    {item.imagem ? (
+                      <Image
+                        source={{ uri: item.imagem }}
+                        style={styles.simpleImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.noImageContainer}>
+                        <Ionicons name="play-circle" size={36} color="#444" />
+                      </View>
+                    )}
+                    <View style={styles.simpleContent}>
+                      <Text style={styles.simpleTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ) : (
+                  <Card
+                    title={item.title}
+                    content={item.content}
+                    imagem={item.imagem}
+                    link={item.link}
+                  />
+                )}
+              </View>
             )}
             showsVerticalScrollIndicator={false}
-            scrollEnabled={!limit} // Desativa o scroll se for preview
+            scrollEnabled={!limit}
+            horizontal={horizontalCard}
+            contentContainerStyle={
+              horizontalCard ? { paddingHorizontal: 12 } : {}
+            }
           />
 
           {showViewMore && videos.length > 0 && (
@@ -412,7 +458,7 @@ export default function YouTubeFeed({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    marginVertical: 10,
   },
   centered: {
     padding: 20,
@@ -465,5 +511,42 @@ const styles = StyleSheet.create({
   },
   viewMoreIcon: {
     marginTop: 2,
+  },
+  horizontalCard: {
+    width: 220,
+    marginHorizontal: 4,
+  },
+  simpleCard: {
+    width: 220,
+    backgroundColor: "#1c1c1c",
+    borderRadius: 8,
+    marginHorizontal: 4,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  simpleImage: {
+    width: "100%",
+    height: 120,
+  },
+  noImageContainer: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#2a2a2a",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  simpleContent: {
+    padding: 10,
+  },
+  simpleTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 6,
+    lineHeight: 18,
   },
 });

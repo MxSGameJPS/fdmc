@@ -8,6 +8,7 @@ import {
 } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform, Alert } from "react-native";
+import { getFirestore } from "firebase/firestore";
 
 // Import do diagnóstico
 import { saveErrorLog, testFirebaseInit } from "./firebase-diagnostic";
@@ -54,37 +55,17 @@ try {
 
 // Inicializar Auth com persistência para React Native
 let auth;
-try {
-  if (Platform.OS === "web") {
-    console.log("Inicializando auth para ambiente web");
+if (Platform.OS === "web") {
+  auth = getAuth(app);
+} else {
+  try {
     auth = getAuth(app);
-  } else {
-    console.log("Inicializando auth para ambiente nativo com AsyncStorage");
-
-    // Tentar verificar se o AsyncStorage está funcionando
-    AsyncStorage.setItem("auth_test", "test")
-      .then(() => console.log("AsyncStorage está funcionando"))
-      .catch((error) => {
-        console.error("AsyncStorage não está funcionando:", error);
-        saveErrorLog("firebase-asyncstorage", error);
-      });
-
+    // Se já existe, apenas usa
+  } catch {
+    // Se não existe, inicializa
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
-  }
-} catch (error) {
-  console.error("Erro ao inicializar Auth:", error);
-  saveErrorLog("firebase-auth-init", error, { platform: Platform.OS });
-
-  // Tentar recuperar uma instância existente com método alternativo
-  try {
-    auth = getAuth(app);
-    console.log("Instância de Auth recuperada com getAuth");
-  } catch (fallbackError) {
-    console.error("Falha ao recuperar instância de Auth:", fallbackError);
-    saveErrorLog("firebase-auth-fallback", fallbackError);
-    auth = null; // Definir explicitamente como null para evitar referências indefinidas
   }
 }
 
@@ -98,12 +79,21 @@ try {
   database = null;
 }
 
+// Inicializar Firestore
+let firestoreDb;
+try {
+  firestoreDb = getFirestore(app);
+} catch (firestoreError) {
+  console.error("Erro ao inicializar Firestore:", firestoreError);
+  firestoreDb = null;
+}
+
 // Executar diagnóstico
 testFirebaseInit(app, auth, database)
   .then((results) => console.log("Diagnóstico Firebase:", results))
   .catch((error) => console.error("Erro ao executar diagnóstico:", error));
 
-export { app, auth, database };
+export { app, auth, database as db, firestoreDb };
 
 // Funções auxiliares para o banco de dados
 export const saveUserData = async (userId, userData) => {
