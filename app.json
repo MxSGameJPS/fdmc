@@ -21,13 +21,18 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.mxsgamejps.fogaodomeucoracao",
-      "versionCode": 11,
+      "versionCode": 12,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_NETWORK_STATE"
-      ]
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDKxDwkyacCFIeLxinbBoY5XbAfmyUaMKs"
+        }
+      }
     },
     "web": {
       "bundler": "metro",

@@ -84,7 +84,7 @@ export default function Home() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            padding: 16,
+            padding: 20,
           }}
         >
           <Ionicons
@@ -110,7 +110,7 @@ export default function Home() {
                 fontSize: 15,
                 fontWeight: "500",
                 marginTop: 2,
-                maxWidth: 320,
+                maxWidth: 250,
               }}
             >
               Descubra onde está a Nação Alvinegra espalhada pelo Brasil! Toque

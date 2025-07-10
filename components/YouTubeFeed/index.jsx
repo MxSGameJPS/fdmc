@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Card from "../card";
+import { YOUTUBE_API_KEY } from "../../services/google";
 
 export default function YouTubeFeed({
   limit,
@@ -141,7 +142,7 @@ export default function YouTubeFeed({
 
     try {
       // ID da API Key
-      const apiKey = "AIzaSyAWMupTOwaGu6aAC2cdPeOWato6pZj6piM";
+      const apiKey = YOUTUBE_API_KEY;
 
       // Estratégia de 2 etapas para economizar cotas:
       // 1. Obter os IDs dos vídeos (do cache ou da API)

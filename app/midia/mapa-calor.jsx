@@ -11,8 +11,8 @@ import { db } from "../../services/firebase";
 import { get, ref, child } from "firebase/database";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { GOOGLE_MAPS_API_KEY } from "../../services/google";
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const INITIAL_REGION = {
   latitude: -14.235,
   longitude: -51.9253,

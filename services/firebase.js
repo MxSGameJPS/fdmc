@@ -13,15 +13,15 @@ import { getFirestore } from "firebase/firestore";
 // Import do diagnóstico
 import { saveErrorLog, testFirebaseInit } from "./firebase-diagnostic";
 
-// Sua configuração Firebase
+// Configuração Firebase (hardcoded)
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
+  apiKey: "AIzaSyCeKD2RYMGN9cl9fK7UNeD_Q8tIg8BA1sI",
+  authDomain: "fdmc-d437a.firebaseapp.com",
+  databaseURL: "https://fdmc-d437a-default-rtdb.firebaseio.com",
+  projectId: "fdmc-d437a",
+  storageBucket: "fdmc-d437a.firebasestorage.app",
+  messagingSenderId: "284919922147",
+  appId: "1:284919922147:web:17ae7d938ce250c13534d6",
 };
 
 // Verificar se o Firebase já foi inicializado

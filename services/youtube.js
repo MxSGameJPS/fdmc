@@ -1,6 +1,8 @@
+import { YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID } from "./google";
+
 // services/youtube.js
-const API_KEY = process.env.YOUTUBE_API_KEY;
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID; // Pergunte ao contratante o ID do canal
+const API_KEY = YOUTUBE_API_KEY;
+const CHANNEL_ID = YOUTUBE_CHANNEL_ID; // Pergunte ao contratante o ID do canal
 
 export const fetchYouTubeVideos = async () => {
   try {
