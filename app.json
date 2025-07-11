@@ -2,7 +2,7 @@
   "expo": {
     "name": "fogao-do-meu-coracao",
     "slug": "fogao-do-meu-coracao",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon-square.png",
     "scheme": "fogaodomeucoracao",
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.mxsgamejps.fogaodomeucoracao",
-      "versionCode": 12,
+      "versionCode": 13,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.READ_EXTERNAL_STORAGE",

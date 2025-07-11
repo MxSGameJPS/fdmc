@@ -12,6 +12,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
+import Constants from "expo-constants";
 
 export default function AboutApp() {
   // Função para abrir WhatsApp
@@ -74,7 +75,10 @@ export default function AboutApp() {
         </View>
 
         <Text style={styles.appName}>Fogão do Meu Coração</Text>
-        <Text style={styles.version}>Versão 1.2.6</Text>
+        <Text style={styles.version}>
+          Versão{" "}
+          {Constants.expoConfig?.version || Constants.manifest?.version || "-"}
+        </Text>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Sobre o App</Text>

@@ -29,7 +29,7 @@ export default function Home() {
             <Ionicons name="arrow-forward" size={16} color="#666" />
           </Pressable>
         </View>
-        <BlogFeed limit={3} showTitle={false} showViewMore={false} />
+        <BlogFeed limit={5} showTitle={false} showViewMore={false} />
       </View>
 
       {/* Seção do YouTube - 3 vídeos mais recentes */}
@@ -42,7 +42,7 @@ export default function Home() {
           </Pressable>
         </View>
         <YouTubeFeed
-          limit={3}
+          limit={5}
           showTitle={false}
           showViewMore={false}
           horizontalCard
@@ -62,7 +62,7 @@ export default function Home() {
           </Pressable>
         </View>
         <InstagramFeed
-          limit={3}
+          limit={5}
           showTitle={false}
           showViewMore={false}
           horizontalCard

@@ -18,22 +18,10 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Importar diretamente do arquivo firebase
-import { auth, database } from "../../services/firebase";
+import { auth, db } from "../../services/firebase";
 import { saveErrorLog, getErrorLogs } from "../../services/firebase-diagnostic";
-
-// Importar separadamente para evitar erros de inicialização
-let createUserWithEmailAndPassword, ref, set;
-try {
-  const authModule = require("firebase/auth");
-  createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
-
-  const dbModule = require("firebase/database");
-  ref = dbModule.ref;
-  set = dbModule.set;
-} catch (error) {
-  console.error("Erro ao importar funções Firebase:", error);
-  saveErrorLog("cadastro-import", error);
-}
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, set } from "firebase/database";
 
 export default function Cadastro() {
   // Estados para os campos do formulário
@@ -66,7 +54,7 @@ export default function Cadastro() {
           return;
         }
 
-        if (!database || !ref || !set) {
+        if (!db || !ref || !set) {
           console.log("Database ou funções de banco não disponíveis");
           setFirebaseError(true);
           saveErrorLog(
@@ -172,34 +160,9 @@ export default function Cadastro() {
             ? "Função de cadastro não está disponível."
             : "Função de cadastro está disponível."
         } ${
-          !database
-            ? "Database não está disponível."
-            : "Database está disponível."
+          !db ? "Database não está disponível." : "Database está disponível."
         }`
       );
-
-      // Tentar reinicializar os módulos Firebase
-      try {
-        const authModule = require("firebase/auth");
-        createUserWithEmailAndPassword =
-          authModule.createUserWithEmailAndPassword;
-
-        const dbModule = require("firebase/database");
-        ref = dbModule.ref;
-        set = dbModule.set;
-
-        if (createUserWithEmailAndPassword && ref && set) {
-          setAuthReady(true);
-          setFirebaseError(false);
-          Alert.alert(
-            "Sucesso",
-            "Módulos de Firebase recarregados com sucesso!"
-          );
-        }
-      } catch (error) {
-        console.error("Erro ao recarregar módulos:", error);
-        saveErrorLog("cadastro-reload-modules", error);
-      }
     } catch (error) {
       console.error("Erro no diagnóstico:", error);
       saveErrorLog("cadastro-diagnostic", error);
@@ -223,7 +186,7 @@ export default function Cadastro() {
       return;
     }
 
-    if (!database || !ref || !set) {
+    if (!db || !ref || !set) {
       saveErrorLog(
         "cadastro-attempt",
         new Error("Serviços de banco de dados não disponíveis")
@@ -248,7 +211,7 @@ export default function Cadastro() {
       console.log("Usuário criado com sucesso:", user.uid);
 
       // Salvar informações adicionais no Realtime Database
-      await set(ref(database, `users/${user.uid}`), {
+      await set(ref(db, `users/${user.uid}`), {
         nome,
         estado,
         cidade,

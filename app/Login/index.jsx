@@ -22,6 +22,7 @@ import * as FileSystem from "expo-file-system";
 // Importar diretamente do arquivo firebase
 import { auth } from "../../services/firebase";
 import { saveErrorLog, getErrorLogs } from "../../services/firebase-diagnostic";
+import { signOut } from "firebase/auth";
 
 // Importar separadamente para evitar erros de inicialização
 let signInWithEmailAndPassword, onAuthStateChanged;
@@ -45,6 +46,7 @@ export default function Login() {
 
   // Verificar se Auth está pronto e se o usuário está logado
   useEffect(() => {
+    let unsubscribe;
     const checkAuth = () => {
       try {
         if (!auth) {
@@ -73,23 +75,14 @@ export default function Login() {
         setAuthReady(true);
         setFirebaseError(false);
 
-        // Verificar se o usuário já está logado
-        const unsubscribe = onAuthStateChanged(
+        // Listener de autenticação do Firebase
+        unsubscribe = onAuthStateChanged(
           auth,
           async (user) => {
             try {
               if (user) {
-                // Verificar se a opção "manter conectado" está ativada
-                const manterConectadoSalvo = await AsyncStorage.getItem(
-                  "manterConectado"
-                );
-
-                if (manterConectadoSalvo === "true") {
-                  console.log(
-                    "Usuário já está logado e optou por manter-se conectado"
-                  );
-                  router.replace("/(tabs)/Home");
-                }
+                // Se o usuário está autenticado, redireciona para Home
+                router.replace("/(tabs)/Home");
               } else {
                 console.log("Nenhum usuário autenticado");
               }
@@ -103,14 +96,6 @@ export default function Login() {
             saveErrorLog("login-onAuthStateChanged-error", error);
           }
         );
-
-        return () => {
-          try {
-            unsubscribe();
-          } catch (error) {
-            console.error("Erro ao desinscrever listener:", error);
-          }
-        };
       } catch (error) {
         console.error("Erro no checkAuth:", error);
         saveErrorLog("login-checkAuth", error);
@@ -120,6 +105,37 @@ export default function Login() {
     };
 
     checkAuth();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  // Ao sair do app, se "manter conectado" for false, faz signOut
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState) => {
+      if (nextAppState === "inactive" || nextAppState === "background") {
+        const manter = await AsyncStorage.getItem("manterConectado");
+        if (manter !== "true") {
+          try {
+            await signOut(auth);
+            await AsyncStorage.removeItem("manterConectado");
+            console.log("Usuário deslogado por não manter conectado");
+          } catch (e) {
+            console.error("Erro ao deslogar ao sair do app:", e);
+          }
+        }
+      }
+    };
+    const subscription =
+      Platform.OS !== "web"
+        ? require("react-native").AppState.addEventListener(
+            "change",
+            handleAppStateChange
+          )
+        : null;
+    return () => {
+      if (subscription) subscription.remove();
+    };
   }, []);
 
   const realizarLogin = async () => {
@@ -154,24 +170,6 @@ export default function Login() {
       // Tentar fazer login com Firebase
       await signInWithEmailAndPassword(auth, email, senha);
       console.log("Login bem-sucedido");
-
-      // Salvar preferência de manter conectado
-      try {
-        if (manterConectado) {
-          await AsyncStorage.setItem("manterConectado", "true");
-          console.log("Preferência de manter conectado salva");
-        } else {
-          await AsyncStorage.removeItem("manterConectado");
-          console.log("Preferência de manter conectado removida");
-        }
-      } catch (storageError) {
-        console.error("Erro ao salvar preferência:", storageError);
-        saveErrorLog("login-save-preference", storageError);
-        // Não interromper o fluxo de login por erro de preferência
-      }
-
-      // Login bem-sucedido, redirecionar para a tela principal
-      router.replace("/(tabs)/Home");
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       saveErrorLog("login-attempt-failed", error, { email });
@@ -190,9 +188,30 @@ export default function Login() {
       }
 
       Alert.alert("Erro no login", mensagemErro);
-    } finally {
       setLoading(false);
+      return;
     }
+
+    // Salvar preferência de manter conectado e deslogar se necessário
+    try {
+      if (manterConectado) {
+        await AsyncStorage.setItem("manterConectado", "true");
+        console.log("Preferência de manter conectado salva");
+      } else {
+        await AsyncStorage.removeItem("manterConectado");
+        await signOut(auth);
+        console.log(
+          "Preferência de manter conectado removida e usuário deslogado"
+        );
+      }
+    } catch (storageError) {
+      console.error("Erro ao salvar preferência:", storageError);
+      saveErrorLog("login-save-preference", storageError);
+    }
+
+    // Login bem-sucedido, redirecionar para a tela principal
+    router.replace("/(tabs)/Home");
+    setLoading(false);
   };
 
   const irParaCadastro = () => {

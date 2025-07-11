@@ -70,14 +70,7 @@ if (Platform.OS === "web") {
 }
 
 // Inicializar Database
-let database;
-try {
-  database = getDatabase(app);
-} catch (dbError) {
-  console.error("Erro ao inicializar Database:", dbError);
-  saveErrorLog("firebase-database-init", dbError);
-  database = null;
-}
+const database = getDatabase(app);
 
 // Inicializar Firestore
 let firestoreDb;

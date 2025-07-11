@@ -423,7 +423,7 @@ export default function YouTubeFeed({
               </View>
             )}
             showsVerticalScrollIndicator={false}
-            scrollEnabled={!limit}
+            scrollEnabled={horizontalCard}
             horizontal={horizontalCard}
             contentContainerStyle={
               horizontalCard ? { paddingHorizontal: 12 } : {}

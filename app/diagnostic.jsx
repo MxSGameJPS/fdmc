@@ -23,7 +23,7 @@ import {
   clearErrorLogs,
   testFirebaseInit,
 } from "../services/firebase-diagnostic";
-import { app, auth, database } from "../services/firebase";
+import { app, auth, db } from "../services/firebase";
 
 export default function DiagnosticScreen() {
   const [testResults, setTestResults] = useState(null);
@@ -48,7 +48,7 @@ export default function DiagnosticScreen() {
     setFirebaseLoading(true);
     try {
       // Teste de inicialização do Firebase
-      const results = await testFirebaseInit(app, auth, database);
+      const results = await testFirebaseInit(app, auth, db);
       setFirebaseDiagnostic(results);
 
       // Carregar logs de erro
