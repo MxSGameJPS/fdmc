@@ -39,8 +39,6 @@ try {
   saveErrorLog("firebase-init", initError, {
     config: "Firebase app initialization",
   });
-
-  // Mostrar alerta se possível, mas evitar ciclos de erro
   try {
     setTimeout(() => {
       Alert.alert(
@@ -58,14 +56,16 @@ let auth;
 if (Platform.OS === "web") {
   auth = getAuth(app);
 } else {
+  // Sempre inicializa o Auth com persistência AsyncStorage no React Native
   try {
-    auth = getAuth(app);
-    // Se já existe, apenas usa
-  } catch {
-    // Se não existe, inicializa
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
+    console.log("Firebase Auth inicializado com persistência AsyncStorage");
+  } catch (error) {
+    // Se já foi inicializado, apenas usa
+    auth = getAuth(app);
+    console.log("Firebase Auth já inicializado, usando instância existente");
   }
 }
 

@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "Expo Build AAB",
+      "command": "npx expo export --platform android && npx eas build --platform android --profile production --non-interactive",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

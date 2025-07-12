@@ -25,45 +25,9 @@ export default function YouTubeFeed({
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    loadVideos();
+    // Sempre busca vídeos novos da API ao abrir a tela
+    fetchYouTubeVideos();
   }, []);
-
-  // Função para carregar vídeos, primeiro tentando do cache
-  const loadVideos = async () => {
-    setLoading(true);
-
-    try {
-      // Tenta carregar do cache primeiro
-      const cachedVideos = await getCachedVideos();
-
-      if (cachedVideos && cachedVideos.length > 0) {
-        console.log("Usando vídeos em cache");
-        setVideos(limit ? cachedVideos.slice(0, limit) : cachedVideos);
-        setError(null);
-        setLoading(false);
-
-        // Verifica se o cache está obsoleto (mais de 6 horas)
-        const cacheInfo = await AsyncStorage.getItem("youtube_cache_timestamp");
-        if (cacheInfo) {
-          const cacheTimestamp = parseInt(cacheInfo);
-          const hoursElapsed = (Date.now() - cacheTimestamp) / (1000 * 60 * 60);
-
-          // Se o cache tiver mais de 6 horas, atualize em segundo plano
-          if (hoursElapsed > 6) {
-            console.log("Cache obsoleto, atualizando em segundo plano");
-            fetchYouTubeVideosInBackground();
-          }
-        }
-      } else {
-        // Se não houver cache, busque normalmente
-        await fetchYouTubeVideos();
-      }
-    } catch (error) {
-      console.error("Erro ao carregar vídeos:", error);
-      await fetchYouTubeVideos();
-    }
-  };
 
   // Função para obter vídeos do cache
   const getCachedVideos = async () => {
@@ -144,51 +108,26 @@ export default function YouTubeFeed({
       // ID da API Key
       const apiKey = YOUTUBE_API_KEY;
 
-      // Estratégia de 2 etapas para economizar cotas:
-      // 1. Obter os IDs dos vídeos (do cache ou da API)
-      // 2. Buscar detalhes dos vídeos usando endpoint /videos (mais econômico)
+      // Sempre buscar IDs novos da API (NÃO usar cache de IDs)
+      const playlistId = "UUGYyVRxyMn-7YuConcWEqYQ"; // Playlist de uploads (U + channelId)
+      const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&playlistId=${playlistId}&part=snippet&maxResults=20&fields=items(snippet/resourceId/videoId)`;
 
-      let videoIds = [];
+      const playlistResponse = await fetch(playlistUrl);
+      const playlistData = await playlistResponse.json();
 
-      // Tentar obter IDs do cache primeiro
-      const cachedIds = await getCachedVideoIds();
-      const idsNeedUpdate = !cachedIds || cachedIds.length === 0;
-
-      // Se precisar atualizar IDs ou não tiver no cache, buscar da API
-      if (idsNeedUpdate) {
-        console.log("Buscando novos IDs de vídeos da playlist");
-
-        // Usar playlistItems para obter apenas os IDs (consome apenas 1 cota)
-        const playlistId = "UUGYyVRxyMn-7YuConcWEqYQ"; // Playlist de uploads (U + channelId)
-        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&playlistId=${playlistId}&part=snippet&maxResults=20&fields=items(snippet/resourceId/videoId)`;
-
-        const playlistResponse = await fetch(playlistUrl);
-        const playlistData = await playlistResponse.json();
-
-        if (playlistData.error) {
-          throw new Error(playlistData.error.message);
-        }
-
-        // Extrair apenas os IDs dos vídeos
-        videoIds = playlistData.items
-          .filter(
-            (item) =>
-              item.snippet &&
-              item.snippet.resourceId &&
-              item.snippet.resourceId.videoId
-          )
-          .map((item) => item.snippet.resourceId.videoId);
-
-        // Salvar IDs no cache para uso futuro
-        if (videoIds.length > 0) {
-          await saveVideoIdsToCache(videoIds);
-        } else {
-          throw new Error("Não foi possível obter IDs de vídeos");
-        }
-      } else {
-        console.log("Usando IDs de vídeos do cache");
-        videoIds = cachedIds;
+      if (playlistData.error) {
+        throw new Error(playlistData.error.message);
       }
+
+      // Extrair apenas os IDs dos vídeos
+      const videoIds = playlistData.items
+        .filter(
+          (item) =>
+            item.snippet &&
+            item.snippet.resourceId &&
+            item.snippet.resourceId.videoId
+        )
+        .map((item) => item.snippet.resourceId.videoId);
 
       // Agora, com os IDs em mãos, usar o endpoint /videos para obter detalhes
       // Este endpoint é mais econômico em termos de cotas
@@ -371,164 +310,135 @@ export default function YouTubeFeed({
   return (
     <View style={styles.container}>
       {showTitle && <Text style={styles.sectionTitle}>YouTube</Text>}
-
-      {videos.length > 0 ? (
-        <>
-          <FlatList
-            data={videos}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={horizontalCard ? styles.horizontalCard : {}}>
-                {/* Card simplificado para carrossel horizontal: só imagem e título */}
-                {horizontalCard ? (
-                  <Pressable
-                    style={styles.simpleCard}
-                    onPress={() => {
-                      if (item.link) {
-                        // React Native Linking
-                        try {
-                          const Linking = require("react-native").Linking;
-                          Linking.openURL(item.link);
-                        } catch (e) {
-                          console.error("Erro ao abrir link:", e);
-                        }
+      {videos.length > 0 && (
+        <FlatList
+          data={videos}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={horizontalCard ? styles.horizontalCard : {}}>
+              {horizontalCard ? (
+                <Pressable
+                  style={styles.simpleCard}
+                  onPress={() => {
+                    if (item.link) {
+                      try {
+                        const Linking = require("react-native").Linking;
+                        Linking.openURL(item.link);
+                      } catch (e) {
+                        console.error("Erro ao abrir link:", e);
                       }
-                    }}
-                  >
-                    {item.imagem ? (
-                      <Image
-                        source={{ uri: item.imagem }}
-                        style={styles.simpleImage}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <View style={styles.noImageContainer}>
-                        <Ionicons name="play-circle" size={36} color="#444" />
-                      </View>
-                    )}
-                    <View style={styles.simpleContent}>
-                      <Text style={styles.simpleTitle} numberOfLines={2}>
-                        {item.title}
-                      </Text>
+                    }
+                  }}
+                >
+                  {item.imagem ? (
+                    <Image
+                      source={{ uri: item.imagem }}
+                      style={styles.simpleImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.noImageContainer}>
+                      <Ionicons name="play-circle" size={36} color="#444" />
                     </View>
-                  </Pressable>
-                ) : (
-                  <Card
-                    title={item.title}
-                    content={item.content}
-                    imagem={item.imagem}
-                    link={item.link}
-                  />
-                )}
-              </View>
-            )}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={horizontalCard}
-            horizontal={horizontalCard}
-            contentContainerStyle={
-              horizontalCard ? { paddingHorizontal: 12 } : {}
-            }
-          />
-
-          {showViewMore && videos.length > 0 && (
-            <Pressable
-              style={styles.viewMoreButton}
-              onPress={navigateToYouTubePage}
-            >
-              <Text style={styles.viewMoreText}>
-                Ver mais vídeos do YouTube
-              </Text>
-              <Ionicons
-                name="arrow-forward"
-                size={16}
-                color="#666"
-                style={styles.viewMoreIcon}
-              />
-            </Pressable>
+                  )}
+                  <View style={styles.simpleContent}>
+                    <Text style={styles.simpleTitle} numberOfLines={2}>
+                      {item.title}
+                    </Text>
+                  </View>
+                </Pressable>
+              ) : (
+                <Card
+                  title={item.title}
+                  content={item.content}
+                  imagem={item.imagem}
+                  link={item.link}
+                />
+              )}
+            </View>
           )}
-        </>
-      ) : (
-        <Text style={styles.emptyText}>Nenhum vídeo encontrado</Text>
+          showsVerticalScrollIndicator={true}
+          scrollEnabled={true}
+          horizontal={horizontalCard}
+          contentContainerStyle={
+            horizontalCard ? { paddingHorizontal: 12 } : {}
+          }
+        />
       )}
+      {/* {showViewMore && videos.length > 0 && (
+        <Pressable
+          style={styles.viewMoreButton}
+          onPress={navigateToYouTubePage}
+        >
+          <Text style={styles.viewMoreText}>Ver mais vídeos do YouTube</Text>
+          <Ionicons
+            name="arrow-forward"
+            size={16}
+            color="#666"
+            style={styles.viewMoreIcon}
+          />
+        </Pressable>
+      )} */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
+    flex: 1,
+    backgroundColor: "#000",
+    padding: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 10,
   },
   centered: {
-    padding: 20,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#000",
   },
   loadingText: {
+    color: "#fff",
     marginTop: 10,
-    fontSize: 16,
-    color: "#555",
   },
   errorText: {
     color: "red",
-    textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   retryButton: {
     backgroundColor: "#d1ac00",
-    padding: 12,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 5,
   },
   retryButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 16,
     color: "#fff",
-  },
-  emptyText: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "#666",
+    fontWeight: "bold",
   },
   viewMoreButton: {
-    backgroundColor: "#f0f0f0",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
-    alignItems: "center",
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
+    marginTop: 16,
+    padding: 10,
+    backgroundColor: "#222",
+    borderRadius: 8,
   },
   viewMoreText: {
-    color: "#333",
+    color: "#fff",
     fontWeight: "bold",
     marginRight: 8,
   },
   viewMoreIcon: {
-    marginTop: 2,
-  },
-  horizontalCard: {
-    width: 220,
-    marginHorizontal: 4,
-  },
-  simpleCard: {
-    width: 220,
-    backgroundColor: "#1c1c1c",
-    borderRadius: 8,
-    marginHorizontal: 4,
-    overflow: "hidden",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    marginLeft: 4,
   },
   simpleImage: {
     width: "100%",
     height: 120,
+    borderRadius: 8,
   },
   noImageContainer: {
     width: "100%",
@@ -536,6 +446,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2a2a2a",
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 8,
   },
   simpleContent: {
     padding: 10,
@@ -546,5 +457,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 6,
     lineHeight: 18,
+  },
+  horizontalCard: {
+    marginRight: 12,
+    width: 220,
+  },
+  simpleCard: {
+    backgroundColor: "#181818",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 10,
+    width: 200,
   },
 });

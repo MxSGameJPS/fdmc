@@ -17,12 +17,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as FileSystem from "expo-file-system";
 
 // Importar diretamente do arquivo firebase
 import { auth } from "../../services/firebase";
 import { saveErrorLog, getErrorLogs } from "../../services/firebase-diagnostic";
-import { signOut } from "firebase/auth";
 
 // Importar separadamente para evitar erros de inicialização
 let signInWithEmailAndPassword, onAuthStateChanged;
@@ -110,33 +108,7 @@ export default function Login() {
     };
   }, []);
 
-  // Ao sair do app, se "manter conectado" for false, faz signOut
-  useEffect(() => {
-    const handleAppStateChange = async (nextAppState) => {
-      if (nextAppState === "inactive" || nextAppState === "background") {
-        const manter = await AsyncStorage.getItem("manterConectado");
-        if (manter !== "true") {
-          try {
-            await signOut(auth);
-            await AsyncStorage.removeItem("manterConectado");
-            console.log("Usuário deslogado por não manter conectado");
-          } catch (e) {
-            console.error("Erro ao deslogar ao sair do app:", e);
-          }
-        }
-      }
-    };
-    const subscription =
-      Platform.OS !== "web"
-        ? require("react-native").AppState.addEventListener(
-            "change",
-            handleAppStateChange
-          )
-        : null;
-    return () => {
-      if (subscription) subscription.remove();
-    };
-  }, []);
+  // Removido signOut automático ao sair do app para garantir persistência do login
 
   const realizarLogin = async () => {
     // Verificar se o Firebase está pronto
@@ -192,17 +164,14 @@ export default function Login() {
       return;
     }
 
-    // Salvar preferência de manter conectado e deslogar se necessário
+    // Salvar preferência de manter conectado (não faz mais signOut automático)
     try {
       if (manterConectado) {
         await AsyncStorage.setItem("manterConectado", "true");
         console.log("Preferência de manter conectado salva");
       } else {
         await AsyncStorage.removeItem("manterConectado");
-        await signOut(auth);
-        console.log(
-          "Preferência de manter conectado removida e usuário deslogado"
-        );
+        console.log("Preferência de manter conectado removida");
       }
     } catch (storageError) {
       console.error("Erro ao salvar preferência:", storageError);
