@@ -1,5 +1,19 @@
-import React from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Easing,
+} from "react-native";
+import { Audio } from "expo-av";
+import { db as database } from "../../services/firebase";
+import { ref, get, update } from "firebase/database";
+import moment from "moment";
 import AuthAlert from "../../components/AuthAlert";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,11 +21,133 @@ import InstagramFeed from "../../components/InstagramFeed";
 import YouTubeFeed from "../../components/YouTubeFeed";
 import BlogFeed from "../../components/BlogFeed";
 
+// Letreiro rodante
+const MARQUEE_TEXT = "Fogão do Meu Coração - Confira as novidades";
+const MARQUEE_DURATION = 9000;
+
+const festivoStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    elevation: 10,
+  },
+  title: { fontSize: 60, marginBottom: 16 },
+  msg: {
+    fontSize: 22,
+    color: "#D1AC00",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  btn: {
+    backgroundColor: "#D1AC00",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+  },
+  btnText: { color: "#222", fontWeight: "bold", fontSize: 18 },
+});
+
 export default function Home() {
-  const { user, loading } = require("../../components/AuthContext").useAuth();
-  const [showAuthAlert, setShowAuthAlert] = React.useState(false);
+  const marqueeAnim = useRef(new Animated.Value(0)).current;
+  const [marqueeWidth, setMarqueeWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (marqueeWidth > 0 && containerWidth > 0) {
+      marqueeAnim.setValue(0);
+      Animated.loop(
+        Animated.timing(marqueeAnim, {
+          toValue: -marqueeWidth,
+          duration: MARQUEE_DURATION,
+          useNativeDriver: true,
+          easing: Easing.linear,
+        })
+      ).start();
+    }
+  }, [marqueeWidth, containerWidth, marqueeAnim]);
+  const { user, loading: authLoading } =
+    require("../../components/AuthContext").useAuth();
+  const [showFestivo, setShowFestivo] = useState(false);
+  const [festivoMsg, setFestivoMsg] = useState("");
+  const anim = useRef(new Animated.Value(0)).current;
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
+
+  // Função para tocar som
+  const playSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/victory.mp3")
+      );
+      await sound.playAsync();
+      setTimeout(() => sound.unloadAsync(), 3000);
+    } catch (_e) {}
+  };
+
+  // Função para verificar missão diária e mostrar efeito
+  useEffect(() => {
+    if (!user || authLoading) return;
+    const checkDailyMission = async () => {
+      try {
+        const missoesRef = ref(database, `users/${user.uid}/missoes`);
+        const pontosRef = ref(database, `users/${user.uid}/pontos`);
+        const [missoesSnap, pontosSnap] = await Promise.all([
+          get(missoesRef),
+          get(pontosRef),
+        ]);
+        let missao = missoesSnap.exists() ? missoesSnap.val() : {};
+        let pontos = pontosSnap.exists() ? pontosSnap.val() : 0;
+        const hoje = moment().format("YYYY-MM-DD");
+        if (missao.ultimaMissaoDiaria !== hoje) {
+          // Missão ainda não feita hoje: marcar como feita e somar pontos
+          const novosPontos = pontos + 100;
+          await update(ref(database, `users/${user.uid}`), {
+            pontos: novosPontos,
+            missoes: {
+              ...missao,
+              ultimaMissaoDiaria: hoje,
+              missaoDiariaConcluida: true,
+            },
+          });
+          setFestivoMsg(
+            "Parabéns! Você ganhou 100 pontos por entrar no app hoje!"
+          );
+          setShowFestivo(true);
+          playSound();
+          Animated.sequence([
+            Animated.timing(anim, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(anim, {
+              toValue: 0,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(anim, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }
+      } catch (_e) {}
+    };
+    checkDailyMission();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]);
+
   function handleProtectedNavigation(route) {
-    if (loading) return;
+    if (authLoading) return;
     if (!user) {
       setShowAuthAlert(true);
       return;
@@ -19,12 +155,63 @@ export default function Home() {
     router.push(route);
   }
 
+  // Modal festivo
+  const FestivoModal = () => (
+    <Modal visible={showFestivo} transparent animationType="fade">
+      <View style={festivoStyles.overlay}>
+        <Animated.View
+          style={[
+            festivoStyles.modal,
+            {
+              opacity: anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 0.7],
+              }),
+            },
+          ]}
+        >
+          <Text style={festivoStyles.title}>🎉</Text>
+          <Text style={festivoStyles.msg}>{festivoMsg}</Text>
+          <TouchableOpacity
+            style={festivoStyles.btn}
+            onPress={() => setShowFestivo(false)}
+          >
+            <Text style={festivoStyles.btnText}>OK</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+
   return (
     <View style={{ flex: 1 }}>
+      <FestivoModal />
+
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Fogão do Meu Coração</Text>
         </View>
+
+        {/* Card de Pontos */}
+        <Pressable
+          onPress={() => handleProtectedNavigation("/jogos/meus-pontos")}
+          style={styles.pontosCard}
+        >
+          <Ionicons
+            name="star"
+            size={36}
+            color="#D1AC00"
+            style={{ marginRight: 12 }}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.pontosCardTitle}>Sistema de Pontos</Text>
+            <Text style={styles.pontosCardSubtitle}>
+              Confira seu saldo de pontos, missões diárias e conquiste
+              recompensas!
+            </Text>
+            <Text style={styles.pontosCardAcessar}>Acessar meus pontos</Text>
+          </View>
+        </Pressable>
 
         {/* Seção do Blog */}
         <View style={styles.section}>
@@ -167,6 +354,60 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
+  },
+  marqueeContainer: {
+    height: 38,
+    overflow: "visible",
+    justifyContent: "center",
+    marginHorizontal: 0,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  marqueeText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFD700",
+    textShadowColor: "#fff8dc",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
+    letterSpacing: 1,
+    paddingHorizontal: 16,
+    textAlign: "left",
+    // Efeito "brilhante" simples
+    textShadowOpacity: 0.8,
+  },
+  pontosCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    elevation: 3,
+    shadowColor: "#D1AC00",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  pontosCardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#D1AC00",
+    marginBottom: 4,
+  },
+  pontosCardSubtitle: {
+    color: "#CCCCCC",
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  pontosCardAcessar: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15,
+    marginTop: 2,
+    textDecorationLine: "underline",
   },
   header: {
     backgroundColor: "#000",

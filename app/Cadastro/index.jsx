@@ -80,25 +80,8 @@ export default function Cadastro() {
   }, []);
 
   // Função para formatar número de WhatsApp
-  const formatWhatsApp = (text) => {
-    // Remove tudo exceto números
-    const cleaned = text.replace(/\D/g, "");
-
-    // Aplica a formatação: (XX) XXXXX-XXXX
-    let formatted = cleaned;
-    if (cleaned.length <= 2) {
-      formatted = cleaned;
-    } else if (cleaned.length <= 7) {
-      formatted = `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
-    } else {
-      formatted = `(${cleaned.slice(0, 2)}) ${cleaned.slice(
-        2,
-        7
-      )}-${cleaned.slice(7, 11)}`;
-    }
-
-    return formatted;
-  };
+  // Aceita qualquer formato internacional, apenas remove espaços extras
+  const formatWhatsApp = (text) => text.replace(/\s+/g, "");
 
   // Validação dos campos do formulário
   const validarFormulario = () => {
@@ -122,8 +105,12 @@ export default function Cadastro() {
       return false;
     }
 
+    // Aceita números internacionais com pelo menos 10 dígitos
     if (!whatsapp.trim() || whatsapp.replace(/\D/g, "").length < 10) {
-      Alert.alert("Erro", "Por favor, informe um número de WhatsApp válido");
+      Alert.alert(
+        "Erro",
+        "Por favor, informe um número de WhatsApp válido (mínimo 10 dígitos)"
+      );
       return false;
     }
 
@@ -330,12 +317,13 @@ export default function Cadastro() {
               <Text style={styles.label}>WhatsApp</Text>
               <TextInput
                 style={styles.input}
-                placeholder="(XX) XXXXX-XXXX"
+                placeholder="Número com DDI (ex: +351XXXXXXXXX)"
                 placeholderTextColor="#999"
                 value={whatsapp}
                 onChangeText={(text) => setWhatsapp(formatWhatsApp(text))}
                 keyboardType="phone-pad"
-                maxLength={15}
+                maxLength={20}
+                autoCapitalize="none"
               />
             </View>
 

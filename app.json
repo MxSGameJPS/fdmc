@@ -2,9 +2,9 @@
   "expo": {
     "name": "fogao-do-meu-coracao",
     "slug": "fogao-do-meu-coracao",
-    "version": "6.0.0",
+    "version": "7.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/LOGO.jpg",
+    "icon": "./assets/images/LOGO.png",
     "scheme": "fogaodomeucoracao",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -16,12 +16,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/LOGO.jpg",
+        "foregroundImage": "./assets/images/LOGO.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.mxsgamejps.fogaodomeucoracao",
-      "versionCode": 15,
+      "versionCode": 16,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -37,14 +37,14 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/LOGO.jpg"
+      "favicon": "./assets/images/LOGO.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/LOGO.jpg",
+          "image": "./assets/images/LOGO.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
