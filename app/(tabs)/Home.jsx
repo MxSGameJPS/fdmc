@@ -1,184 +1,165 @@
+import React from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import AuthAlert from "../../components/AuthAlert";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import InstagramFeed from "../../components/InstagramFeed";
 import YouTubeFeed from "../../components/YouTubeFeed";
 import BlogFeed from "../../components/BlogFeed";
-import BrasileiraoWidget from "../../components/BrasileiraoWidget";
 
 export default function Home() {
-  // Funções para navegar para as páginas completas
-  const navigateToYouTube = () => router.push("/midia/youtube");
-  const navigateToInstagram = () => router.push("/midia/instagram");
-  const navigateToBlog = () => router.push("/(tabs)/Blog");
-  const navigateToBrasileirao = () => router.push("/competicoes/brasileirao");
-  const navigateToJogos = () => router.push("/(tabs)/Jogos");
+  const { user, loading } = require("../../components/AuthContext").useAuth();
+  const [showAuthAlert, setShowAuthAlert] = React.useState(false);
+  function handleProtectedNavigation(route) {
+    if (loading) return;
+    if (!user) {
+      setShowAuthAlert(true);
+      return;
+    }
+    router.push(route);
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Fogão do Meu Coração</Text>
-      </View>
-
-      {/* Seção do Blog - 3 posts mais recentes */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Notícias</Text>
-          <Pressable onPress={navigateToBlog} style={styles.viewMoreButton}>
-            <Text style={styles.viewMoreText}>Ver mais</Text>
-            <Ionicons name="arrow-forward" size={16} color="#666" />
-          </Pressable>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Fogão do Meu Coração</Text>
         </View>
-        <BlogFeed limit={5} showTitle={false} showViewMore={false} />
-      </View>
 
-      {/* Seção do YouTube - 3 vídeos mais recentes */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Últimos Vídeos</Text>
-          <Pressable onPress={navigateToYouTube} style={styles.viewMoreButton}>
-            <Text style={styles.viewMoreText}>Ver mais</Text>
-            <Ionicons name="arrow-forward" size={16} color="#666" />
-          </Pressable>
-        </View>
-        <YouTubeFeed
-          limit={5}
-          showTitle={false}
-          showViewMore={false}
-          horizontalCard
-        />
-      </View>
-
-      {/* Seção do Instagram - 3 posts mais recentes */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Instagram</Text>
-          <Pressable
-            onPress={navigateToInstagram}
-            style={styles.viewMoreButton}
-          >
-            <Text style={styles.viewMoreText}>Ver mais</Text>
-            <Ionicons name="arrow-forward" size={16} color="#666" />
-          </Pressable>
-        </View>
-        <InstagramFeed
-          limit={5}
-          showTitle={false}
-          showViewMore={false}
-          horizontalCard
-        />
-      </View>
-
-      {/* Card do Mapa de Calor */}
-      <View
-        style={{
-          backgroundColor: "#222",
-          borderRadius: 12,
-          margin: 16,
-          marginBottom: 0,
-          overflow: "hidden",
-        }}
-      >
-        <Pressable
-          onPress={() => router.push("/midia/mapa-calor")}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <Ionicons
-            name="flame"
-            size={32}
-            color="#d1ac00"
-            style={{ marginRight: 16 }}
-          />
-          <View>
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-                fontSize: 18,
-                marginBottom: 4,
-              }}
-            >
-              Mapa de Calor da Torcida
-            </Text>
-            <Text
-              style={{
-                color: "#aaa",
-                fontSize: 15,
-                fontWeight: "500",
-                marginTop: 2,
-                maxWidth: 250,
-              }}
-            >
-              Descubra onde está a Nação Alvinegra espalhada pelo Brasil! Toque
-              para ver o mapa de calor exclusivo da torcida do Fogão.
-            </Text>
-          </View>
-        </Pressable>
-      </View>
-
-      {/* Seção do Brasileirão */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Brasileirão 2025</Text>
-        </View>
-        <Pressable
-          onPress={navigateToBrasileirao}
-          style={{
-            backgroundColor: "#D1AC00",
-            borderRadius: 8,
-            paddingVertical: 14,
-            paddingHorizontal: 24,
-            alignItems: "center",
-            marginHorizontal: 16,
-            marginBottom: 16,
-            marginTop: 8,
-            elevation: 2,
-          }}
-        >
-          <Text style={{ color: "#222", fontWeight: "bold", fontSize: 16 }}>
-            Confira a classificação do Brasileirão agora
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* Seção Próximos Jogos */}
-      <View style={styles.section}>
-        <Pressable
-          onPress={navigateToJogos}
-          style={{
-            borderRadius: 12,
-            overflow: "hidden",
-            backgroundColor: "#222",
-            marginHorizontal: 8,
-            marginBottom: 8,
-          }}
-        >
+        {/* Seção do Blog */}
+        <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Próximos Jogos</Text>
-            {/* <View style={styles.viewMoreButton}>
-              <Text style={styles.viewMoreText}>Ver calendário</Text>
+            <Text style={styles.sectionTitle}>Notícias</Text>
+            <Pressable
+              onPress={() => handleProtectedNavigation("/(tabs)/Blog")}
+              style={styles.viewMoreButton}
+            >
+              <Text style={styles.viewMoreText}>Ver mais</Text>
               <Ionicons name="arrow-forward" size={16} color="#666" />
-            </View> */}
+            </Pressable>
           </View>
-          <View style={styles.jogosInfo}>
-            <Text style={styles.jogosText}>
-              Calendário atualizado com os próximos 9 jogos
-            </Text>
-            <Text style={styles.jogosText}>
-              Inclui partidas do Brasileirão, Copa do Brasil e Libertadores
-            </Text>
-            <Text style={styles.jogosUpdate}>Atualizado em: 10/07/2025</Text>
-          </View>
-        </Pressable>
-      </View>
+          <BlogFeed limit={5} showTitle={false} showViewMore={false} />
+        </View>
 
-      {/* Espaço no final da página */}
-      <View style={styles.footer} />
-    </ScrollView>
+        {/* Seção do YouTube */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Últimos Vídeos</Text>
+            <Pressable
+              onPress={() => handleProtectedNavigation("/midia/youtube")}
+              style={styles.viewMoreButton}
+            >
+              <Text style={styles.viewMoreText}>Ver mais</Text>
+              <Ionicons name="arrow-forward" size={16} color="#666" />
+            </Pressable>
+          </View>
+          <YouTubeFeed
+            limit={5}
+            showTitle={false}
+            showViewMore={false}
+            horizontalCard
+          />
+        </View>
+
+        {/* Seção do Instagram */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Instagram</Text>
+            <Pressable
+              onPress={() => handleProtectedNavigation("/midia/instagram")}
+              style={styles.viewMoreButton}
+            >
+              <Text style={styles.viewMoreText}>Ver mais</Text>
+              <Ionicons name="arrow-forward" size={16} color="#666" />
+            </Pressable>
+          </View>
+          <InstagramFeed
+            limit={5}
+            showTitle={false}
+            showViewMore={false}
+            horizontalCard
+          />
+        </View>
+
+        {/* Seção do Mapa de Calor da Torcida */}
+        <View style={styles.section}>
+          <Pressable
+            onPress={() => handleProtectedNavigation("/midia/mapa-calor")}
+            style={styles.heatmapCard}
+          >
+            <Ionicons
+              name="flame"
+              size={40}
+              color="#D1AC00"
+              style={{ marginBottom: 8 }}
+            />
+            <Text style={styles.heatmapTitle}>Mapa de Calor da Torcida</Text>
+            <Text style={styles.heatmapSubtitle}>
+              Veja onde está a Nação Alvinegra espalhada pelo Brasil e pelo
+              mundo!
+            </Text>
+            <Text style={styles.heatmapButton}>Acessar Mapa de Calor</Text>
+          </Pressable>
+        </View>
+
+        {/* Seção do Brasileirão */}
+        <View style={styles.section}>
+          <Pressable
+            onPress={() =>
+              handleProtectedNavigation("/competicoes/brasileirao")
+            }
+            style={{
+              backgroundColor: "#D1AC00",
+              borderRadius: 8,
+              paddingVertical: 14,
+              paddingHorizontal: 24,
+              alignItems: "center",
+              marginHorizontal: 16,
+              marginBottom: 16,
+              marginTop: 8,
+              elevation: 2,
+            }}
+          >
+            <Text style={{ color: "#222", fontWeight: "bold", fontSize: 16 }}>
+              Confira a classificação do Brasileirão agora
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Seção Próximos Jogos */}
+        <View style={styles.section}>
+          <Pressable
+            onPress={() => handleProtectedNavigation("/(tabs)/Jogos")}
+            style={{
+              borderRadius: 12,
+              overflow: "hidden",
+              backgroundColor: "#222",
+              marginHorizontal: 8,
+              marginBottom: 8,
+            }}
+          >
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Próximos Jogos</Text>
+            </View>
+            <View style={styles.jogosInfo}>
+              <Text style={styles.jogosText}>
+                Calendário atualizado com os próximos 9 jogos
+              </Text>
+              <Text style={styles.jogosText}>
+                {`Inclui partidas do Brasileirão, Copa do Brasil e Libertadores`}
+              </Text>
+              <Text style={styles.jogosUpdate}>Atualizado em: 10/07/2025</Text>
+            </View>
+          </Pressable>
+        </View>
+
+        <View style={styles.footer} />
+      </ScrollView>
+      <AuthAlert
+        visible={showAuthAlert}
+        onClose={() => setShowAuthAlert(false)}
+      />
+    </View>
   );
 }
 
@@ -228,6 +209,44 @@ const styles = StyleSheet.create({
   viewMoreText: {
     color: "#fff",
     marginRight: 4,
+  },
+  heatmapCard: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 16,
+    alignItems: "center",
+    marginBottom: 8,
+    elevation: 3,
+    shadowColor: "#D1AC00",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  heatmapTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#D1AC00",
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  heatmapSubtitle: {
+    fontSize: 14,
+    color: "#CCCCCC",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  heatmapButton: {
+    backgroundColor: "#D1AC00",
+    color: "#222",
+    fontWeight: "bold",
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 8,
+    textAlign: "center",
+    overflow: "hidden",
   },
   footer: {
     height: 40,

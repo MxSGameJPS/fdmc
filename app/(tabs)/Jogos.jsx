@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import AuthAlert from "../../components/AuthAlert";
 import { StatusBar } from "expo-status-bar";
 import moment from "moment";
 import "moment/locale/pt-br";
@@ -18,6 +19,17 @@ import jogosData from "../../assets/data/botafogo-jogos-2025.json";
 moment.locale("pt-br");
 
 export default function Jogos() {
+  const { user, loading: authLoading } =
+    require("../../components/AuthContext").useAuth();
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
+  function handleProtectedNavigation(route) {
+    if (authLoading) return;
+    if (!user) {
+      setShowAuthAlert(true);
+      return;
+    }
+    // router.push(route); // descomente se adicionar navegação para detalhes
+  }
   const [jogos, setJogos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -197,6 +209,10 @@ export default function Jogos() {
           Dados oficiais do Botafogo - Próximos 9 jogos
         </Text>
       </View>
+      <AuthAlert
+        visible={showAuthAlert}
+        onClose={() => setShowAuthAlert(false)}
+      />
     </View>
   );
 }

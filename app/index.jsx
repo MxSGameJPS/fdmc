@@ -24,23 +24,8 @@ export default function Index() {
         // Verificar se o usuário está logado
         const user = await checkAuthState();
 
-        if (user) {
-          // Verificar se a opção "manter conectado" está ativa
-          const manterConectado = await AsyncStorage.getItem("manterConectado");
-
-          if (manterConectado === "true") {
-            console.log(
-              "Usuário autenticado e optou por manter-se conectado, redirecionando..."
-            );
-            router.replace("/(tabs)/Home");
-          } else {
-            console.log(
-              "Usuário autenticado, mas não optou por manter-se conectado"
-            );
-          }
-        } else {
-          console.log("Nenhum usuário autenticado");
-        }
+        // Sempre redireciona para Home, independente do login
+        router.replace("/(tabs)/Home");
       } catch (error) {
         console.error("Erro ao verificar autenticação:", error);
       } finally {

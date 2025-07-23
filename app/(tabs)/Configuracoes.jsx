@@ -12,49 +12,23 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { Stack, router } from "expo-router";
 import { Ionicons, FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { auth, logout, getUserData } from "../../services/firebase";
-import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth";
+import { getUserData } from "../../services/firebase";
+import { useAuth } from "../../components/AuthContext";
 import Constants from "expo-constants";
 
 export default function Configuracoes() {
   // Forçar persistência do Auth ao montar a tela
-  React.useEffect(() => {
-    try {
-      const authInstance = getAuth();
-      setPersistence(authInstance, browserLocalPersistence)
-        .then(() => {
-          console.log(
-            "Persistência do Auth garantida (browserLocalPersistence)"
-          );
-        })
-        .catch((error) => {
-          console.error("Erro ao definir persistência do Auth:", error);
-        });
-    } catch (e) {
-      console.error("Erro ao tentar garantir persistência do Auth:", e);
-    }
-  }, []);
+  // Removed logic for setting persistence
   const [temaDark, setTemaDark] = React.useState(true);
   const [dataSaver, setDataSaver] = React.useState(false);
-  const [user, setUser] = React.useState(auth.currentUser);
   const [userName, setUserName] = React.useState("");
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setUser(auth.currentUser);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const { user, logout } = useAuth();
 
   React.useEffect(() => {
     const fetchUserName = async () => {
       if (user && user.uid) {
         const userData = await getUserData(user.uid);
-        setUserName(userData?.nome || "Usuário logado");
+        setUserName(userData?.nome || user.displayName || "Usuário logado");
       } else {
         setUserName("");
       }
@@ -67,8 +41,7 @@ export default function Configuracoes() {
     router.push("/settings/NotificationSettings");
 
   const handleLogout = async () => {
-    await logout(true);
-    setUser(null);
+    await logout();
     router.replace("/Login");
   };
 

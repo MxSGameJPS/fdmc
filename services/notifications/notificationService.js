@@ -21,7 +21,6 @@ export async function registerForPushNotificationsAsync() {
   const isPortuguese = Localization.locale.startsWith("pt");
 
   if (Platform.OS === "android") {
-    // Configurar canal de notificação para Android em português
     await Notifications.setNotificationChannelAsync("new-content", {
       name: isPortuguese ? "Novos Conteúdos" : "New Content",
       description: isPortuguese
@@ -34,41 +33,46 @@ export async function registerForPushNotificationsAsync() {
   }
 
   if (Device.isDevice) {
-    // Verificar permissões existentes
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-
-    // Se não temos permissão ainda, solicitar ao usuário
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-
-    // Se o usuário não concedeu permissão, não podemos mostrar notificações
     if (finalStatus !== "granted") {
       console.log("Permissão para notificações não concedida!");
       return;
     }
-
-    // Obter o token do Expo
     try {
       token = (
         await Notifications.getExpoPushTokenAsync({
           projectId: Constants.expoConfig?.extra?.eas?.projectId,
         })
       ).data;
-
-      // Salvar o token localmente
       await AsyncStorage.setItem("pushToken", token);
       console.log("Token de notificação:", token);
+
+      // Enviar token para backend Firebase Functions
+      try {
+        await fetch(
+          "https://us-central1-fdmc-d437a.cloudfunctions.net/registerToken",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          }
+        );
+        console.log("Token registrado no backend!");
+      } catch (error) {
+        console.error("Erro ao registrar token no backend:", error);
+      }
     } catch (error) {
       console.error("Erro ao obter token de notificações:", error);
     }
   } else {
     console.log("Notificações push só funcionam em dispositivos físicos");
   }
-
   return token;
 }
 

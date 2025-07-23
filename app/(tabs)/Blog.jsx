@@ -15,12 +15,15 @@ import {
   View,
 } from "react-native";
 import { fetchPostsFromXml } from "../../services/blogService";
+import AuthAlert from "../../components/AuthAlert";
 
 moment.locale("pt-br");
 
 export default function Blog() {
+  const { user, loading } = require("../../components/AuthContext").useAuth();
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [blogLoading, setBlogLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
@@ -30,21 +33,19 @@ export default function Blog() {
 
   const loadPosts = async (forceRefresh = false) => {
     try {
-      setLoading(true);
+      setBlogLoading(true);
       setError(null);
 
       // Usar a nova função para extrair diretamente do XML
       const blogPosts = await fetchPostsFromXml();
       setPosts(blogPosts);
-
-    
     } catch (error) {
       console.error("Erro ao carregar posts do blog:", error);
       setError(
         "Não foi possível carregar as notícias. Tente novamente mais tarde."
       );
     } finally {
-      setLoading(false);
+      setBlogLoading(false);
       setRefreshing(false);
     }
   };
@@ -59,6 +60,11 @@ export default function Blog() {
   };
 
   const openPost = (url) => {
+    if (loading) return;
+    if (!user) {
+      setShowAuthAlert(true);
+      return;
+    }
     if (url) {
       Linking.openURL(url).catch((err) =>
         console.error("Erro ao abrir URL do post:", err)
@@ -112,7 +118,7 @@ export default function Blog() {
     );
   };
 
-  if (loading && !refreshing) {
+  if (blogLoading && !refreshing) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#000000" />
@@ -155,6 +161,10 @@ export default function Blog() {
             Nenhuma notícia encontrada. Puxe para baixo para atualizar.
           </Text>
         }
+      />
+      <AuthAlert
+        visible={showAuthAlert}
+        onClose={() => setShowAuthAlert(false)}
       />
     </SafeAreaView>
   );

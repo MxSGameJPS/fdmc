@@ -9,9 +9,21 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Stack, router } from "expo-router";
+import AuthAlert from "../../components/AuthAlert";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 
 export default function Midia() {
+  const { user, loading } = require("../../components/AuthContext").useAuth();
+  const [showAuthAlert, setShowAuthAlert] = React.useState(false);
+  function handleProtectedNavigation(route) {
+    if (loading) return;
+    if (!user) {
+      setShowAuthAlert(true);
+      return;
+    }
+    router.push(route);
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
@@ -34,7 +46,7 @@ export default function Midia() {
           {/* Mapa de Calor da Torcida */}
           <TouchableOpacity
             style={styles.socialCard}
-            onPress={() => router.push("/midia/mapa-calor")}
+            onPress={() => handleProtectedNavigation("/midia/mapa-calor")}
           >
             <View
               style={[styles.cardIconContainer, { backgroundColor: "#388E3C" }]}
@@ -55,7 +67,7 @@ export default function Midia() {
           {/* YouTube */}
           <TouchableOpacity
             style={styles.socialCard}
-            onPress={() => router.push("/midia/youtube")}
+            onPress={() => handleProtectedNavigation("/midia/youtube")}
           >
             <View
               style={[styles.cardIconContainer, { backgroundColor: "#FF0000" }]}
@@ -74,7 +86,7 @@ export default function Midia() {
           {/* Instagram */}
           <TouchableOpacity
             style={styles.socialCard}
-            onPress={() => router.push("/midia/instagram")}
+            onPress={() => handleProtectedNavigation("/midia/instagram")}
           >
             <View
               style={[styles.cardIconContainer, { backgroundColor: "#C13584" }]}
@@ -123,6 +135,10 @@ export default function Midia() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <AuthAlert
+        visible={showAuthAlert}
+        onClose={() => setShowAuthAlert(false)}
+      />
     </SafeAreaView>
   );
 }

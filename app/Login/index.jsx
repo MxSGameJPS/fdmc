@@ -78,9 +78,9 @@ export default function Login() {
           auth,
           async (user) => {
             try {
+              // Apenas loga o estado, não redireciona automaticamente
               if (user) {
-                // Se o usuário está autenticado, redireciona para Home
-                router.replace("/(tabs)/Home");
+                console.log("Usuário autenticado");
               } else {
                 console.log("Nenhum usuário autenticado");
               }
