@@ -41,6 +41,24 @@ export default function JogosMenu() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
+          onPress={() => router.push("/jogos/palpites")}
+        >
+          <Ionicons
+            name="trophy"
+            size={32}
+            color="#D1AC00"
+            style={styles.icon}
+          />
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Acerte o resultado do jogo</Text>
+            <Text style={styles.cardSubtitle}>
+              Dê seu palpite e ganhe pontos
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#D1AC00" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
           onPress={() => router.push("/jogos/meus-pontos")}
         >
           <Ionicons name="star" size={32} color="#D1AC00" style={styles.icon} />

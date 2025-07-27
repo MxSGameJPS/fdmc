@@ -13,7 +13,6 @@ import {
 import { Audio } from "expo-av";
 import { db as database } from "../../services/firebase";
 import { ref, get, update } from "firebase/database";
-import moment from "moment";
 import AuthAlert from "../../components/AuthAlert";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,9 +20,100 @@ import InstagramFeed from "../../components/InstagramFeed";
 import YouTubeFeed from "../../components/YouTubeFeed";
 import BlogFeed from "../../components/BlogFeed";
 
+import moment from "moment";
 // Letreiro rodante
 const MARQUEE_TEXT = "Fogão do Meu Coração - Confira as novidades";
 const MARQUEE_DURATION = 9000;
+
+// Componente Card de incentivo ao palpite
+function PalpiteIncentivoCard() {
+  const [proxJogo, setProxJogo] = React.useState(null);
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [feedbackMsg, setFeedbackMsg] = React.useState("");
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(
+          "https://fdmc-api.vercel.app/api/jogos?proximo=true"
+        );
+        const data = await res.json();
+        // Filtra o próximo jogo cujo prazo de palpite ainda não passou
+        if (data && Array.isArray(data.jogos) && data.jogos.length > 0) {
+          const agora = moment();
+          const proximoValido = data.jogos.find((jogo) => {
+            if (!jogo.data || !jogo.hora) return false;
+            // Calcula o limite de palpite
+            const limite = moment(
+              jogo.data + " " + jogo.hora,
+              "YYYY-MM-DD HH:mm"
+            ).subtract(1, "hours");
+            return agora.isBefore(limite);
+          });
+          if (proximoValido) {
+            setProxJogo(proximoValido);
+          }
+        }
+      } catch (_) {}
+    })();
+  }, []);
+
+  // Função para tocar som de missão
+  const playSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/victory.mp3")
+      );
+      await sound.playAsync();
+      setTimeout(() => sound.unloadAsync(), 3000);
+    } catch (_) {}
+  };
+
+  // Simulação de feedback visual/sonoro ao fazer palpite
+  const handlePalpite = () => {
+    router.push("/jogos/palpites");
+  };
+
+  if (!proxJogo) return null;
+  return (
+    <Pressable style={styles.palpiteCardHome} onPress={handlePalpite}>
+      <Text style={styles.palpiteTitleHome}>
+        Venha fazer o palpite para o jogo{" "}
+        <Text style={{ color: "#FFD700" }}>
+          {proxJogo.mandante} x {proxJogo.visitante}
+        </Text>{" "}
+        até dia{" "}
+        <Text style={{ color: "#FFD700" }}>
+          {moment(proxJogo.data).format("DD/MM/YYYY")}
+        </Text>{" "}
+        {/* Calcula o horário limite para palpite */}
+        {(() => {
+          // proxJogo.hora pode ser "18:30" ou "19:00" etc
+          const horaStr = proxJogo.hora;
+          let horaLimite = horaStr;
+          if (typeof horaStr === "string" && horaStr.includes(":")) {
+            const [h, m] = horaStr.split(":").map(Number);
+            let date = moment(
+              proxJogo.data + " " + horaStr,
+              "YYYY-MM-DD HH:mm"
+            );
+            date = date.subtract(1, "hours");
+            horaLimite = date.format("HH:mm");
+          }
+          return (
+            <>
+              até <Text style={{ color: "#FFD700" }}>{horaLimite}</Text> e ganhe
+              pontos para trocar por prêmios!
+            </>
+          );
+        })()}
+      </Text>
+      <View style={styles.palpiteBtnHome}>
+        <Text style={styles.palpiteBtnTextHome}>Fazer palpite</Text>
+      </View>
+      {/* Nenhum feedback de registro de palpite na Home */}
+    </Pressable>
+  );
+}
 
 const festivoStyles = StyleSheet.create({
   overlay: {
@@ -190,28 +280,10 @@ export default function Home() {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Fogão do Meu Coração</Text>
-        </View>
+        </View>      
 
-        {/* Card de Pontos */}
-        <Pressable
-          onPress={() => handleProtectedNavigation("/jogos/meus-pontos")}
-          style={styles.pontosCard}
-        >
-          <Ionicons
-            name="star"
-            size={36}
-            color="#D1AC00"
-            style={{ marginRight: 12 }}
-          />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.pontosCardTitle}>Sistema de Pontos</Text>
-            <Text style={styles.pontosCardSubtitle}>
-              Confira seu saldo de pontos, missões diárias e conquiste
-              recompensas!
-            </Text>
-            <Text style={styles.pontosCardAcessar}>Acessar meus pontos</Text>
-          </View>
-        </Pressable>
+        {/* Card de incentivo ao palpite */}
+        <PalpiteIncentivoCard />
 
         {/* Seção do Blog */}
         <View style={styles.section}>
@@ -247,6 +319,27 @@ export default function Home() {
             horizontalCard
           />
         </View>
+
+         {/* Card de Pontos */}
+        <Pressable
+          onPress={() => handleProtectedNavigation("/jogos/meus-pontos")}
+          style={styles.pontosCard}
+        >
+          <Ionicons
+            name="star"
+            size={36}
+            color="#D1AC00"
+            style={{ marginRight: 12 }}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.pontosCardTitle}>Sistema de Pontos</Text>
+            <Text style={styles.pontosCardSubtitle}>
+              Confira seu saldo de pontos, missões diárias e conquiste
+              recompensas!
+            </Text>
+            <Text style={styles.pontosCardAcessar}>Acessar meus pontos</Text>
+          </View>
+        </Pressable>
 
         {/* Seção do Instagram */}
         <View style={styles.section}>
@@ -510,5 +603,39 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     marginTop: 8,
+  },
+  // Componente Card de incentivo ao palpite
+  palpiteCardHome: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 22,
+    marginTop: 24,
+    marginBottom: 18,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFD700",
+    shadowColor: "#FFD700",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  palpiteTitleHome: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 12,
+    lineHeight: 22,
+  },
+  palpiteBtnHome: {
+    backgroundColor: "#FFD700",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 32,
+  },
+  palpiteBtnTextHome: {
+    color: "#222",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
