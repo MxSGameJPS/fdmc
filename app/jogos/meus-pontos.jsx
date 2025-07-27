@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { db as database } from "../../services/firebase";
@@ -17,6 +18,7 @@ export default function MeusPontos() {
   // Estado para feedback dos palpites
   const [palpiteFeedback, setPalpiteFeedback] = useState(null);
   const [historicoPalpites, setHistoricoPalpites] = useState([]);
+  const [palpiteFeito, setPalpiteFeito] = useState(null);
 
   async function verificarPalpite() {
     try {
@@ -90,34 +92,6 @@ export default function MeusPontos() {
           pontos: 0,
           ok: false,
         });
-      }
-      // Acertou pior jogador
-      if (resultado.piorJogador === palpite.piorJogador) {
-        missoesUpdate.acertouPiorJogador = true;
-        pontosGanhos += 10;
-        feedback.push({
-          label: "Acertou o pior jogador!",
-          pontos: 10,
-          ok: true,
-        });
-        acertouAlgo = true;
-      } else {
-        feedback.push({
-          label: "Errou o pior jogador.",
-          pontos: 0,
-          ok: false,
-        });
-      }
-      // Feedback visual/sonoro nostálgico
-      if (acertouAlgo) {
-        try {
-          const { Audio } = require("expo-av");
-          const soundObject = new Audio.Sound();
-          await soundObject.loadAsync(
-            require("../../assets/sounds/victory.mp3")
-          );
-          await soundObject.playAsync();
-        } catch (_) {}
       }
       // Atualizar pontos, missões e fezPalpite no Firebase
       if (user && pontosGanhos > 0) {
@@ -248,11 +222,18 @@ export default function MeusPontos() {
         setHistoricoPalpites(histStr ? JSON.parse(histStr) : []);
       } catch (_) {}
     })();
+    // Carregar palpite feito
+    (async () => {
+      try {
+        const palpiteStr = await AsyncStorage.getItem("palpiteAtual");
+        setPalpiteFeito(palpiteStr ? JSON.parse(palpiteStr) : null);
+      } catch (_) {}
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen
         options={{
           title: "Meus Pontos",
@@ -283,8 +264,31 @@ export default function MeusPontos() {
           <Text style={styles.pointsValue}>{userPoints ?? 0}</Text>
           <Text style={styles.pointsSubtitle}>pontos acumulados</Text>
 
-          {/* Feedback dos palpites */}
-          {palpiteFeedback && (
+          {/* Card do palpite feito */}
+          {palpiteFeito && (
+            <View style={styles.palpiteCard}>
+              <Text style={styles.palpiteTitle}>Seu palpite</Text>
+              <Text style={styles.palpiteTotal}>
+                Placar: {palpiteFeito.placarMandante} x{" "}
+                {palpiteFeito.placarVisitante}
+              </Text>
+              <Text style={styles.palpiteTotal}>
+                Melhor jogador: {palpiteFeito.melhorJogador || "-"}
+              </Text>
+              <Text style={styles.palpiteTotal}>
+                Pior jogador: {palpiteFeito.piorJogador || "-"}
+              </Text>
+              <Text style={styles.palpiteTotal}>
+                Goleadores:{" "}
+                {Array.isArray(palpiteFeito.goleadores)
+                  ? palpiteFeito.goleadores.join(", ")
+                  : "-"}
+              </Text>
+            </View>
+          )}
+
+          {/* Card de resultado do palpite */}
+          {palpiteFeedback && palpiteFeedback.total > 0 && (
             <View style={styles.palpiteCard}>
               <Text style={styles.palpiteTitle}>Resultado do seu palpite</Text>
               <Text style={styles.palpiteTotal}>
@@ -301,26 +305,6 @@ export default function MeusPontos() {
                   {item.ok ? "✅" : "❌"} {item.label}{" "}
                   {item.pontos > 0 ? `(+${item.pontos})` : ""}
                 </Text>
-              ))}
-            </View>
-          )}
-
-          {/* Histórico de palpites */}
-          {historicoPalpites.length > 0 && (
-            <View style={styles.historicoCard}>
-              <Text style={styles.historicoTitle}>Histórico de palpites</Text>
-              {historicoPalpites.map((p, idx) => (
-                <View key={idx} style={styles.historicoItem}>
-                  <Text style={styles.historicoData}>{p.data}</Text>
-                  <Text style={styles.historicoJogo}>
-                    Jogo #{p.jogoId} | Placar: {p.placarMandante} x{" "}
-                    {p.placarVisitante}
-                  </Text>
-                  <Text style={styles.historicoPontuacao}>
-                    Pontuação:{" "}
-                    <Text style={{ color: "#D1AC00" }}>+{p.total}</Text>
-                  </Text>
-                </View>
               ))}
             </View>
           )}
@@ -353,7 +337,7 @@ export default function MeusPontos() {
           acumular ainda mais pontos e se divertir no app!
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -429,7 +413,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     textAlign: "center",
   },
-  container: { flex: 1, backgroundColor: "#000", padding: 24 },
+  container: { backgroundColor: "#000", padding: 24, flex: 1 },
   backButton: {
     backgroundColor: "#222",
     borderRadius: 8,

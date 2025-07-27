@@ -144,10 +144,29 @@ export default function Palpites() {
     fetchElenco();
   }, []);
 
-  // Salvar palpites localmente
+  // Salvar e carregar palpite localmente
   const { user } = require("../../components/AuthContext");
   const { update, ref } = require("firebase/database");
   const { db: database } = require("../../services/firebase");
+
+  useEffect(() => {
+    async function carregarPalpite() {
+      const salvo = await AsyncStorage.getItem("palpiteAtual");
+      if (salvo) {
+        try {
+          const palpite = JSON.parse(salvo);
+          if (palpite && palpite.jogoId === jogo?.id) {
+            setPlacarMandante(palpite.placarMandante ?? 0);
+            setPlacarVisitante(palpite.placarVisitante ?? 0);
+            setGoleadores(palpite.goleadores ?? []);
+            setMelhorJogador(palpite.melhorJogador ?? null);
+            setPiorJogador(palpite.piorJogador ?? null);
+          }
+        } catch {}
+      }
+    }
+    if (jogo) carregarPalpite();
+  }, [jogo]);
 
   async function salvarPalpite() {
     const palpite = {
@@ -213,6 +232,41 @@ export default function Palpites() {
   const agora = new Date();
   const podePalpitar = agora < limitePalpite;
 
+  if (!podePalpitar) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#000",
+        }}
+      >
+        <Text
+          style={{
+            color: "#FFD700",
+            fontSize: 18,
+            textAlign: "center",
+            margin: 24,
+          }}
+        >
+          O tempo para palpitar neste jogo já acabou!
+        </Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#D1AC00",
+            borderRadius: 8,
+            padding: 12,
+            marginTop: 16,
+          }}
+          onPress={() => router.back()}
+        >
+          <Text style={{ color: "#222", fontWeight: "bold" }}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -231,91 +285,83 @@ export default function Palpites() {
           Você pode palpitar até: {formatarDataHora(limitePalpite)}
         </Text>
       </View>
-      {podePalpitar ? (
-        <>
-          <Text style={styles.sectionTitle}>Seu palpite de placar</Text>
-          <View style={styles.placarRow}>
-            <TextInput
-              style={styles.placarInput}
-              keyboardType="number-pad"
-              value={placarMandante.toString()}
-              onChangeText={(t) => setPlacarMandante(Number(t))}
-            />
-            <Text style={styles.placarX}>x</Text>
-            <TextInput
-              style={styles.placarInput}
-              keyboardType="number-pad"
-              value={placarVisitante.toString()}
-              onChangeText={(t) => setPlacarVisitante(Number(t))}
-            />
-          </View>
+      <Text style={styles.sectionTitle}>Seu palpite de placar</Text>
+      <View style={styles.placarRow}>
+        <TextInput
+          style={styles.placarInput}
+          keyboardType="number-pad"
+          value={placarMandante.toString()}
+          onChangeText={(t) => setPlacarMandante(Number(t))}
+        />
+        <Text style={styles.placarX}>x</Text>
+        <TextInput
+          style={styles.placarInput}
+          keyboardType="number-pad"
+          value={placarVisitante.toString()}
+          onChangeText={(t) => setPlacarVisitante(Number(t))}
+        />
+      </View>
 
-          <Text style={styles.sectionTitle}>Quem marcará gol?</Text>
-          {elenco.map((jogador) => (
-            <TouchableOpacity
-              key={jogador.id}
-              style={styles.checkboxRow}
-              onPress={() => {
-                setGoleadores(
-                  goleadores.includes(jogador.nome)
-                    ? goleadores.filter((n) => n !== jogador.nome)
-                    : [...goleadores, jogador.nome]
-                );
-              }}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  goleadores.includes(jogador.nome) && styles.checkboxChecked,
-                ]}
-              />
-              <Text style={styles.jogadorNome}>{jogador.nome}</Text>
-            </TouchableOpacity>
-          ))}
+      <Text style={styles.sectionTitle}>Quem marcará gol?</Text>
+      {elenco.map((jogador) => (
+        <TouchableOpacity
+          key={jogador.id}
+          style={styles.checkboxRow}
+          onPress={() => {
+            setGoleadores(
+              goleadores.includes(jogador.nome)
+                ? goleadores.filter((n) => n !== jogador.nome)
+                : [...goleadores, jogador.nome]
+            );
+          }}
+        >
+          <View
+            style={[
+              styles.checkbox,
+              goleadores.includes(jogador.nome) && styles.checkboxChecked,
+            ]}
+          />
+          <Text style={styles.jogadorNome}>{jogador.nome}</Text>
+        </TouchableOpacity>
+      ))}
 
-          <Text style={styles.sectionTitle}>Quem será o melhor jogador?</Text>
-          {elenco.map((jogador) => (
-            <TouchableOpacity
-              key={jogador.id + "melhor"}
-              style={styles.radioRow}
-              onPress={() => setMelhorJogador(jogador.nome)}
-            >
-              <View
-                style={[
-                  styles.radio,
-                  melhorJogador === jogador.nome && styles.radioChecked,
-                ]}
-              />
-              <Text style={styles.jogadorNome}>{jogador.nome}</Text>
-            </TouchableOpacity>
-          ))}
+      <Text style={styles.sectionTitle}>Quem será o melhor jogador?</Text>
+      {elenco.map((jogador) => (
+        <TouchableOpacity
+          key={jogador.id + "melhor"}
+          style={styles.radioRow}
+          onPress={() => setMelhorJogador(jogador.nome)}
+        >
+          <View
+            style={[
+              styles.radio,
+              melhorJogador === jogador.nome && styles.radioChecked,
+            ]}
+          />
+          <Text style={styles.jogadorNome}>{jogador.nome}</Text>
+        </TouchableOpacity>
+      ))}
 
-          <Text style={styles.sectionTitle}>Quem será o pior jogador?</Text>
-          {elenco.map((jogador) => (
-            <TouchableOpacity
-              key={jogador.id + "pior"}
-              style={styles.radioRow}
-              onPress={() => setPiorJogador(jogador.nome)}
-            >
-              <View
-                style={[
-                  styles.radio,
-                  piorJogador === jogador.nome && styles.radioChecked,
-                ]}
-              />
-              <Text style={styles.jogadorNome}>{jogador.nome}</Text>
-            </TouchableOpacity>
-          ))}
+      <Text style={styles.sectionTitle}>Quem será o pior jogador?</Text>
+      {elenco.map((jogador) => (
+        <TouchableOpacity
+          key={jogador.id + "pior"}
+          style={styles.radioRow}
+          onPress={() => setPiorJogador(jogador.nome)}
+        >
+          <View
+            style={[
+              styles.radio,
+              piorJogador === jogador.nome && styles.radioChecked,
+            ]}
+          />
+          <Text style={styles.jogadorNome}>{jogador.nome}</Text>
+        </TouchableOpacity>
+      ))}
 
-          <TouchableOpacity style={styles.salvarBtn} onPress={salvarPalpite}>
-            <Text style={styles.salvarBtnText}>Salvar palpites</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <Text style={styles.limiteInfo}>
-          O tempo para palpitar neste jogo já acabou!
-        </Text>
-      )}
+      <TouchableOpacity style={styles.salvarBtn} onPress={salvarPalpite}>
+        <Text style={styles.salvarBtnText}>Salvar palpites</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
