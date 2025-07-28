@@ -27,6 +27,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../../components/AuthContext";
 
 export default function Palpites() {
   function formatarData(dataStr) {
@@ -145,7 +146,7 @@ export default function Palpites() {
   }, []);
 
   // Salvar e carregar palpite localmente
-  const { user } = require("../../components/AuthContext");
+  const { user } = useAuth();
   const { update, ref } = require("firebase/database");
   const { db: database } = require("../../services/firebase");
 
@@ -161,14 +162,46 @@ export default function Palpites() {
             setGoleadores(palpite.goleadores ?? []);
             setMelhorJogador(palpite.melhorJogador ?? null);
             setPiorJogador(palpite.piorJogador ?? null);
+            // Atualiza fezPalpite no Firebase se houver user
+            if (user && user.uid) {
+              try {
+                console.log(
+                  "Atualizando fezPalpite para TRUE ao carregar palpite",
+                  user.uid
+                );
+                await update(ref(database, `users/${user.uid}`), {
+                  fezPalpite: true,
+                });
+              } catch (err) {
+                console.log("Erro ao atualizar fezPalpite ao carregar:", err);
+              }
+            } else {
+              console.log("User não disponível ao carregar palpite");
+            }
           }
-        } catch {}
+        } catch (err) {
+          console.log("Erro ao carregar palpite local:", err);
+        }
       }
     }
-    if (jogo) carregarPalpite();
-  }, [jogo]);
+    if (jogo && user && user.uid) carregarPalpite();
+  }, [jogo, user, database, ref, update]);
 
   async function salvarPalpite() {
+    // Carrega todos palpites salvos (pode ser só um, mas já prepara para múltiplos jogos)
+    let palpitesSalvos = [];
+    try {
+      const salvo = await AsyncStorage.getItem("palpites");
+      if (salvo) {
+        palpitesSalvos = JSON.parse(salvo);
+        if (!Array.isArray(palpitesSalvos)) palpitesSalvos = [];
+      }
+    } catch {}
+
+    // Remove palpite antigo deste jogo, se existir
+    palpitesSalvos = palpitesSalvos.filter((p) => p.jogoId !== jogo?.id);
+
+    // Novo palpite
     const palpite = {
       jogoId: jogo?.id,
       placarMandante,
@@ -178,17 +211,31 @@ export default function Palpites() {
       piorJogador,
       data: new Date().toISOString(),
     };
+    palpitesSalvos.push(palpite);
+    await AsyncStorage.setItem("palpites", JSON.stringify(palpitesSalvos));
+    // Também salva o último palpite para compatibilidade com telas antigas
     await AsyncStorage.setItem("palpiteAtual", JSON.stringify(palpite));
+
     // Salva fezPalpite: true no Realtime Database
     if (user && user.uid) {
       try {
+        console.log(
+          "Atualizando fezPalpite para TRUE ao salvar palpite",
+          user.uid
+        );
         await update(ref(database, `users/${user.uid}`), { fezPalpite: true });
-      } catch (e) {
-        // erro opcionalmente pode ser tratado
+        alert("Palpite salvo! Você pode editar até o prazo final.");
+        router.back();
+      } catch (err) {
+        console.log("Erro ao atualizar fezPalpite ao salvar:", err);
+        alert("Erro ao salvar palpite. Tente novamente.");
       }
+    } else {
+      alert(
+        "Você precisa estar logado para salvar o palpite. Tente novamente."
+      );
+      console.log("User não disponível ao salvar palpite");
     }
-    alert("Palpite salvo! Aguarde o resultado após o jogo.");
-    router.back();
   }
 
   if (loading || !jogo) {
@@ -359,8 +406,15 @@ export default function Palpites() {
         </TouchableOpacity>
       ))}
 
-      <TouchableOpacity style={styles.salvarBtn} onPress={salvarPalpite}>
-        <Text style={styles.salvarBtnText}>Salvar palpites</Text>
+      <TouchableOpacity
+        style={styles.salvarBtn}
+        onPress={salvarPalpite}
+        disabled={!user || !user.uid}
+        opacity={!user || !user.uid ? 0.5 : 1}
+      >
+        <Text style={styles.salvarBtnText}>
+          {!user || !user.uid ? "Carregando usuário..." : "Salvar palpites"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

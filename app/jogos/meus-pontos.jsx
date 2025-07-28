@@ -93,6 +93,25 @@ export default function MeusPontos() {
           ok: false,
         });
       }
+
+      // Acertou pior jogador
+      if (resultado.piorJogador === palpite.piorJogador) {
+        missoesUpdate.acertouPiorJogador = true;
+        pontosGanhos += 10;
+        feedback.push({
+          label: "Acertou o pior jogador!",
+          pontos: 10,
+          ok: true,
+        });
+        acertouAlgo = true;
+      } else {
+        feedback.push({
+          label: "Errou o pior jogador.",
+          pontos: 0,
+          ok: false,
+        });
+      }
+
       // Atualizar pontos, missões e fezPalpite no Firebase
       if (user && pontosGanhos > 0) {
         const pontosRef = ref(database, `users/${user.uid}/pontos`);
@@ -124,7 +143,7 @@ export default function MeusPontos() {
               missaoAtual.acertouPiorJogador ??
               false,
           },
-          fezPalpite: true,
+          fezPalpite: true, // (Ajuste: ideal é marcar na tela de palpite)
         });
         setUserPoints(pontos + pontosGanhos);
       }

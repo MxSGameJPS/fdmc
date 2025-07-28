@@ -21,15 +21,10 @@ import YouTubeFeed from "../../components/YouTubeFeed";
 import BlogFeed from "../../components/BlogFeed";
 
 import moment from "moment";
-// Letreiro rodante
-const MARQUEE_TEXT = "Fogão do Meu Coração - Confira as novidades";
-const MARQUEE_DURATION = 9000;
 
 // Componente Card de incentivo ao palpite
 function PalpiteIncentivoCard() {
   const [proxJogo, setProxJogo] = React.useState(null);
-  const [showFeedback, setShowFeedback] = React.useState(false);
-  const [feedbackMsg, setFeedbackMsg] = React.useState("");
   React.useEffect(() => {
     (async () => {
       try {
@@ -37,17 +32,23 @@ function PalpiteIncentivoCard() {
           "https://fdmc-api.vercel.app/api/jogos?proximo=true"
         );
         const data = await res.json();
-        // Filtra o próximo jogo cujo prazo de palpite ainda não passou
-        if (data && Array.isArray(data.jogos) && data.jogos.length > 0) {
+        // Mostra o card para o próximo jogo futuro, mesmo com hora 'A definir'
+        console.log("JOGOS DA API:", data);
+        if (data && Array.isArray(data) && data.length > 0) {
           const agora = moment();
-          const proximoValido = data.jogos.find((jogo) => {
-            if (!jogo.data || !jogo.hora) return false;
-            // Calcula o limite de palpite
-            const limite = moment(
-              jogo.data + " " + jogo.hora,
-              "YYYY-MM-DD HH:mm"
-            ).subtract(1, "hours");
-            return agora.isBefore(limite);
+          const proximoValido = data.find((jogo) => {
+            if (!jogo.data) return false;
+            const dataJogo = moment(jogo.data, "YYYY-MM-DD");
+            const ehFuturo = dataJogo.isSameOrAfter(agora, "day");
+            console.log(
+              "TESTANDO JOGO:",
+              jogo,
+              "DATAJOGO:",
+              dataJogo.format(),
+              "É FUTURO?",
+              ehFuturo
+            );
+            return ehFuturo;
           });
           if (proximoValido) {
             setProxJogo(proximoValido);
@@ -280,7 +281,7 @@ export default function Home() {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Fogão do Meu Coração</Text>
-        </View>      
+        </View>
 
         {/* Card de incentivo ao palpite */}
         <PalpiteIncentivoCard />
@@ -320,7 +321,7 @@ export default function Home() {
           />
         </View>
 
-         {/* Card de Pontos */}
+        {/* Card de Pontos */}
         <Pressable
           onPress={() => handleProtectedNavigation("/jogos/meus-pontos")}
           style={styles.pontosCard}
