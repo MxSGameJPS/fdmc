@@ -18,7 +18,8 @@ Notifications.setNotificationHandler({
 export async function registerForPushNotificationsAsync() {
   let token;
 
-  const isPortuguese = Localization.locale.startsWith("pt");
+  const locale = Localization.getLocales()[0]?.languageTag || "pt-BR";
+  const isPortuguese = locale.startsWith("pt");
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("new-content", {
@@ -35,27 +36,27 @@ export async function registerForPushNotificationsAsync() {
   if (Device.isDevice) {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
+    console.log("Status de permissão inicial:", existingStatus);
     let finalStatus = existingStatus;
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
+      console.log("Status de permissão após request:", finalStatus);
     }
     if (finalStatus !== "granted") {
       console.log("Permissão para notificações não concedida!");
       return;
     }
     try {
-      token = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId: Constants.expoConfig?.extra?.eas?.projectId,
-        })
-      ).data;
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+      console.log("projectId usado para getExpoPushTokenAsync:", projectId);
+      token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+      console.log("Token de notificação gerado:", token);
       await AsyncStorage.setItem("pushToken", token);
-      console.log("Token de notificação:", token);
 
       // Enviar token para backend Firebase Functions
       try {
-        await fetch(
+        const response = await fetch(
           "https://us-central1-fdmc-d437a.cloudfunctions.net/registerToken",
           {
             method: "POST",
@@ -63,7 +64,8 @@ export async function registerForPushNotificationsAsync() {
             body: JSON.stringify({ token }),
           }
         );
-        console.log("Token registrado no backend!");
+        const backendResult = await response.text();
+        console.log("Resposta do backend ao registrar token:", backendResult);
       } catch (error) {
         console.error("Erro ao registrar token no backend:", error);
       }

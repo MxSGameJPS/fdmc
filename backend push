@@ -1,0 +1,128 @@
+const { setGlobalOptions } = require("firebase-functions");
+
+// For cost control, you can set the maximum number of containers that can be
+// running at the same time. This helps mitigate the impact of unexpected
+// traffic spikes by instead downgrading performance. This limit is a
+// per-function limit. You can override the limit for each function using the
+// `maxInstances` option in the function's options, e.g.
+// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
+// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
+// functions should each use functions.runWith({ maxInstances: 10 }) instead.
+// In the v1 API, each function can only serve one request per container, so
+// this will be the maximum concurrent request count.
+setGlobalOptions({ maxInstances: 10 });
+
+// Create and deploy your first functions
+// https://firebase.google.com/docs/functions/get-started
+
+// exports.helloWorld = onRequest((request, response) => {
+//   logger.info("Hello logs!", {structuredData: true});
+//   response.send("Hello from Firebase!");
+// });
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const fetch = require("node-fetch");
+
+admin.initializeApp();
+const db = admin.firestore();
+
+const EXPO_PUSH_COLLECTION = "expoPushTokens";
+const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
+const SEND_AUTH_KEY = "fdmc2025supersecret";
+// Chave secreta simples para testes
+
+// Função para registrar token
+exports.registerToken = functions.https.onRequest(async (req, res) => {
+  if (req.method !== "POST") {
+    console.log("Método não permitido para registro de token:", req.method);
+    return res.status(405).send("Método não permitido");
+  }
+  const { token } = req.body;
+  console.log("Recebido token para registro:", token);
+  if (!token) {
+    console.log("Token ausente no body da requisição");
+    return res.status(400).json({ error: "Token ausente" });
+  }
+  try {
+    await db.collection(EXPO_PUSH_COLLECTION).doc(token).set({ token });
+    console.log("Token salvo com sucesso no Firestore:", token);
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Erro ao salvar token no Firestore:", err);
+    return res
+      .status(500)
+      .json({
+        error: "Erro ao salvar token",
+        details: err && err.message ? err.message : err,
+      });
+  }
+});
+
+// Função para enviar notificação
+exports.sendNotification = functions.https.onRequest(async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).send("Método não permitido");
+  }
+  // Autenticação simples por chave
+  const auth = req.headers["authorization"];
+  if (!auth || auth !== `Bearer ${SEND_AUTH_KEY}`) {
+    // DEBUG: Retornar informações para diagnóstico
+    return res.status(401).json({
+      error: "Não autorizado",
+      receivedAuth: auth,
+      expectedAuth: `Bearer ${SEND_AUTH_KEY}`,
+      headerKeys: Object.keys(req.headers),
+    });
+  }
+  const { title, message, data } = req.body;
+  if (!title || !message) {
+    return res.status(400).json({ error: "Título e mensagem obrigatórios" });
+  }
+  try {
+    const snapshot = await db.collection(EXPO_PUSH_COLLECTION).get();
+    const tokens = snapshot.docs.map((doc) => doc.data().token);
+    if (tokens.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Nenhum token registrado",
+      });
+    }
+    // Envia notificação para todos os tokens
+    const messages = tokens.map((token) => ({
+      to: token,
+      sound: "default",
+      title,
+      body: message,
+      data,
+    }));
+    const response = await fetch(EXPO_PUSH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(messages),
+    });
+    const result = await response.json();
+    // Retornar apenas um resumo para evitar erro de header grande
+    let expoErrors = [];
+    if (Array.isArray(result.data)) {
+      expoErrors = result.data
+        .filter((r) => r.status !== "ok")
+        .map((r) => r.message || JSON.stringify(r));
+      if (expoErrors.length > 3) {
+        expoErrors = expoErrors.slice(0, 3);
+        const totalErros = result.data.filter((r) => r.status !== "ok").length;
+        expoErrors.push(`...e mais ${totalErros - 3} erro(s) oculto(s)`);
+      }
+    }
+    return res
+      .status(200)
+      .json({ success: true, sent: messages.length, expoErrors });
+  } catch (err) {
+    // Log detalhado do erro para debug
+    return res.status(500).json({
+      error: "Erro ao enviar notificação",
+      details: err && err.message ? err.message : err,
+    });
+  }
+});

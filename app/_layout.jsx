@@ -5,6 +5,7 @@ import { AuthProvider } from "../components/AuthContext";
 
 export default function Layout() {
   useEffect(() => {
+    console.log("Chamando registerForPushNotificationsAsync");
     registerForPushNotificationsAsync();
   }, []);
   return (
